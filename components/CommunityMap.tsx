@@ -67,6 +67,13 @@ export default function CommunityMap() {
   const icons = useLeafletIcons()
 
   const fetchProfiles = useCallback(async () => {
+    // Check if Supabase is properly configured
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'https://placeholder.supabase.co') {
+      console.log('Supabase not configured, skipping profile fetch')
+      setLoading(false)
+      return
+    }
+
     try {
       const { data, error } = await supabase
         .from('profiles')

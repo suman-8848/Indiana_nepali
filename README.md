@@ -22,8 +22,8 @@ A web application to help Nepali people living in Indiana connect with each othe
 ### 1. Clone and Install Dependencies
 
 ```bash
-git clone <your-repo-url>
-cd nepali-community-indiana
+git clone https://github.com/suman-8848/Indiana_nepali.git
+cd Indiana_nepali
 npm install
 ```
 

@@ -21,6 +21,13 @@ export default function Register() {
     setLoading(true)
     setMessage('')
 
+    // Check if Supabase is properly configured
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'https://placeholder.supabase.co') {
+      setMessage('Database not configured. Please contact the administrator.')
+      setLoading(false)
+      return
+    }
+
     try {
       // Geocode the location
       const coordinates = await geocodeLocation(formData.cityOrZip)
