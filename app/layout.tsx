@@ -15,18 +15,23 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
       <body className={inter.className}>
         <nav className="bg-blue-600 text-white p-4">
-          <div className="container mx-auto flex justify-between items-center">
-            <h1 className="text-xl font-bold">Nepali Community Indiana</h1>
-            <div className="space-x-4">
-              <a href="/" className="hover:underline">Home</a>
-              <a href="/map" className="hover:underline">Find Members</a>
-              <a href="/register" className="hover:underline">Register</a>
+          <div className="container mx-auto">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+              <h1 className="text-lg sm:text-xl font-bold mb-2 sm:mb-0">Nepali Community Indiana</h1>
+              <div className="flex flex-wrap gap-2 sm:gap-4">
+                <a href="/" className="hover:underline text-sm sm:text-base">Home</a>
+                <a href="/map" className="hover:underline text-sm sm:text-base">Find Members</a>
+                <a href="/register" className="hover:underline text-sm sm:text-base">Register</a>
+              </div>
             </div>
           </div>
         </nav>
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-4 sm:py-8">
           {children}
         </main>
       </body>

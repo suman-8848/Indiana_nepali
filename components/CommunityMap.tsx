@@ -182,42 +182,44 @@ export default function CommunityMap() {
 
   return (
     <div>
-      <div className="mb-6 bg-white p-4 rounded-lg shadow-md">
-        <div className="space-y-4">
+      <div className="mb-4 sm:mb-6 bg-white p-3 sm:p-4 rounded-lg shadow-md">
+        <div className="space-y-3 sm:space-y-4">
           {/* Location Input Section */}
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-4">
             <button
               onClick={handleGetLocation}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm sm:text-base w-full sm:w-auto"
             >
-              Use My Location
+              📍 Use My Location
             </button>
             
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">or</span>
-              <input
-                type="text"
-                placeholder="Enter city or ZIP code in Indiana"
-                value={locationInput}
-                onChange={(e) => setLocationInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleLocationSearch()}
-                className="border border-gray-300 rounded px-3 py-2 text-sm w-64"
-              />
-              <button
-                onClick={handleLocationSearch}
-                disabled={locationLoading}
-                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-              >
-                {locationLoading ? 'Searching...' : 'Search'}
-              </button>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+              <span className="text-sm text-gray-500 text-center sm:text-left">or</span>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Enter city or ZIP code"
+                  value={locationInput}
+                  onChange={(e) => setLocationInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleLocationSearch()}
+                  className="border border-gray-300 rounded px-3 py-2 text-sm flex-1 sm:w-48"
+                />
+                <button
+                  onClick={handleLocationSearch}
+                  disabled={locationLoading}
+                  className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap"
+                >
+                  {locationLoading ? 'Searching...' : 'Search'}
+                </button>
+              </div>
             </div>
           </div>
 
           {/* Filter and Info Section */}
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-4">
             {userLocation && (
               <div className="flex items-center gap-2">
-                <label className="text-sm font-medium">Search radius:</label>
+                <label className="text-sm font-medium">Radius:</label>
                 <select
                   value={searchRadius}
                   onChange={(e) => setSearchRadius(Number(e.target.value))}
@@ -231,17 +233,17 @@ export default function CommunityMap() {
               </div>
             )}
             
-            <div className="text-sm text-gray-600">
+            <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
               {userLocation 
-                ? `Showing ${filteredProfiles.length} community members within ${searchRadius} miles`
-                : 'Set your location to find nearby community members'
+                ? `Showing ${filteredProfiles.length} members within ${searchRadius} miles`
+                : 'Set your location to find nearby members'
               }
             </div>
 
             {userLocation && (
               <button
                 onClick={() => setUserLocation(null)}
-                className="text-sm text-red-600 hover:text-red-800 underline"
+                className="text-sm text-red-600 hover:text-red-800 underline text-center sm:text-left"
               >
                 Clear Location
               </button>
@@ -250,7 +252,7 @@ export default function CommunityMap() {
         </div>
       </div>
 
-      <div className="h-[600px] w-full rounded-lg overflow-hidden shadow-md relative">
+      <div className="h-[400px] sm:h-[500px] md:h-[600px] w-full rounded-lg overflow-hidden shadow-md relative">
         {typeof window !== 'undefined' && (
           <MapContainer
             center={center}
@@ -297,20 +299,20 @@ export default function CommunityMap() {
         )}
         
         {!userLocation && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
-            <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-md">
-              <h3 className="text-lg font-semibold mb-2">Find Nearby Community Members</h3>
-              <p className="text-gray-600 mb-4">
+          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10 p-4">
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg text-center max-w-sm sm:max-w-md w-full">
+              <h3 className="text-base sm:text-lg font-semibold mb-2">Find Nearby Community Members</h3>
+              <p className="text-gray-600 mb-4 text-sm sm:text-base">
                 Set your location to discover Nepali community members near you in Indiana.
               </p>
               <div className="space-y-2">
                 <button
                   onClick={handleGetLocation}
-                  className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm sm:text-base"
                 >
                   📍 Use My Current Location
                 </button>
-                <p className="text-sm text-gray-500">or enter a city/ZIP code above</p>
+                <p className="text-xs sm:text-sm text-gray-500">or enter a city/ZIP code above</p>
               </div>
             </div>
           </div>
