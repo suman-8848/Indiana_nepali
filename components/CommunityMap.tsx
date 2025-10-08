@@ -406,126 +406,130 @@ export default function CommunityMap() {
           </div>
         </div>
 
-        {/* Futuristic Map Container */}
-        <div className="relative group">
-          <div className="absolute inset-0 bg-gradient-to-r from-violet-500/40 via-cyan-500/40 to-emerald-500/40 rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-500"></div>
-          <div className="relative h-[600px] sm:h-[700px] md:h-[800px] w-full rounded-3xl overflow-hidden shadow-2xl backdrop-blur-xl bg-white/10 dark:bg-black/10 border-2 border-white/20 dark:border-white/10">
-            {typeof window !== 'undefined' && (
-              <MapContainer
-                center={center}
-                zoom={zoom}
-                style={{ height: '100%', width: '100%' }}
-                scrollWheelZoom={true}
-                dragging={true}
-                touchZoom={true}
-                doubleClickZoom={true}
-                boxZoom={true}
-                keyboard={true}
-              >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
+      </div>
 
-                {/* User location marker */}
-                {userLocation && icons && (
-                  <Marker position={[userLocation.lat, userLocation.lng]} icon={icons.userIcon}>
-                    <Popup>
-                      <div className="text-center p-2">
-                        <div className="text-2xl mb-2">🎯</div>
-                        <h3 className="font-bold text-lg text-blue-600">Your Location</h3>
-                        <p className="text-sm text-gray-600 mt-1">You are here!</p>
-                      </div>
-                    </Popup>
-                  </Marker>
-                )}
+      {/* Futuristic Map Container */}
+      <div className="relative group">
+        <div className="absolute inset-0 bg-gradient-to-r from-violet-500/40 via-cyan-500/40 to-emerald-500/40 rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-500"></div>
+        <div className="relative h-[600px] sm:h-[700px] md:h-[800px] w-full rounded-3xl overflow-hidden shadow-2xl backdrop-blur-xl bg-white/10 dark:bg-black/10 border-2 border-white/20 dark:border-white/10">
+          {typeof window !== 'undefined' && (
+            <MapContainer
+              center={center}
+              zoom={zoom}
+              style={{ height: '100%', width: '100%' }}
+              scrollWheelZoom={true}
+              dragging={true}
+              touchZoom={true}
+              doubleClickZoom={true}
+              boxZoom={true}
+              keyboard={true}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
 
-                {/* Community member markers */}
-                {icons && markersToRender.map((profile) => (
-                  <Marker
-                    key={`${profile.id}-${profile.position[0]}-${profile.position[1]}`}
-                    position={profile.position}
-                    icon={icons.communityIcon}
-                  >
-                    <Popup>
-                      <div className="p-4 max-w-sm">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                            {profile.full_name.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <h3 className="font-bold text-xl text-gray-800 mb-1">{profile.full_name}</h3>
-                            <div className="flex items-center gap-1 text-sm text-gray-600">
-                              <span className="text-red-500">📍</span>
-                              <span>{profile.city_or_zip}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="space-y-2 mb-3">
-                          <div className="flex items-center gap-2 text-sm bg-gray-50 p-2 rounded-lg">
-                            <span className="text-green-600">📞</span>
-                            <span className="font-medium">{formatContact(profile)}</span>
-                          </div>
-                        </div>
-
-                        {profile.about_me && (
-                          <div className="border-t pt-3">
-                            <div className="flex items-start gap-2">
-                              <span className="text-blue-500 text-sm">💬</span>
-                              <div>
-                                <p className="text-sm font-semibold text-gray-700 mb-1">About:</p>
-                                <p className="text-sm text-gray-600 leading-relaxed">{profile.about_me}</p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </Popup>
-                  </Marker>
-                ))}
-              </MapContainer>
-            )}
-
-            {!userLocation && (
-              <div className="absolute inset-0 bg-gradient-to-br from-violet-900/80 via-purple-900/60 to-indigo-900/80 backdrop-blur-2xl flex items-center justify-center z-10 p-6">
-                <div className="relative group max-w-lg w-full">
-                  <div className="absolute inset-0 bg-gradient-to-r from-violet-500/50 via-cyan-500/50 to-emerald-500/50 rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-500"></div>
-                  <div className="relative backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/20 dark:border-white/10 p-10 rounded-3xl shadow-2xl text-center transform hover:scale-105 transition-all duration-500">
-                    <div className="relative mb-8">
-                      <div className="absolute inset-0 bg-gradient-to-r from-violet-400 to-cyan-400 rounded-full blur-2xl opacity-50 animate-pulse"></div>
-                      <div className="relative text-8xl animate-bounce">🗺️</div>
+              {/* User location marker */}
+              {userLocation && icons && (
+                <Marker position={[userLocation.lat, userLocation.lng]} icon={icons.userIcon}>
+                  <Popup>
+                    <div className="text-center p-2">
+                      <div className="text-2xl mb-2">🎯</div>
+                      <h3 className="font-bold text-lg text-blue-600">Your Location</h3>
+                      <p className="text-sm text-gray-600 mt-1">You are here!</p>
                     </div>
-                    <h3 className="text-4xl font-black mb-4 bg-gradient-to-r from-violet-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
-                      Discover Your Community
-                    </h3>
-                    <p className="text-xl text-white/80 mb-8 leading-relaxed">
-                      Set your location to find and connect with <span className="font-bold text-cyan-300">Nepali community members</span> near you in Indiana.
-                    </p>
-                    <div className="space-y-6">
-                      <button
-                        onClick={handleGetLocation}
-                        className="group relative overflow-hidden w-full bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:via-purple-500 hover:to-indigo-500 text-white px-8 py-5 rounded-2xl font-bold text-xl shadow-2xl hover:shadow-violet-500/50 transform hover:scale-105 hover:-translate-y-2 transition-all duration-300 flex items-center justify-center gap-4"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <div className="relative flex items-center gap-4">
-                          <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
-                            <span className="text-2xl">📍</span>
-                          </div>
-                          <span>Use My Current Location</span>
+                  </Popup>
+                </Marker>
+              )}
+
+              {/* Community member markers */}
+              {icons && markersToRender.map((profile) => (
+                <Marker
+                  key={`${profile.id}-${profile.position[0]}-${profile.position[1]}`}
+                  position={profile.position}
+                  icon={icons.communityIcon}
+                >
+                  <Popup>
+                    <div className="p-4 max-w-sm">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                          {profile.full_name.charAt(0).toUpperCase()}
                         </div>
-                      </button>
-                      <div className="flex items-center gap-4 text-white/60">
-                        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
-                        <span className="font-medium">or use the search above</span>
-                        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
+                        <div>
+                          <h3 className="font-bold text-xl text-gray-800 mb-1">{profile.full_name}</h3>
+                          <div className="flex items-center gap-1 text-sm text-gray-600">
+                            <span className="text-red-500">📍</span>
+                            <span>{profile.city_or_zip}</span>
+                          </div>
+                        </div>
                       </div>
+
+                      <div className="space-y-2 mb-3">
+                        <div className="flex items-center gap-2 text-sm bg-gray-50 p-2 rounded-lg">
+                          <span className="text-green-600">📞</span>
+                          <span className="font-medium">{formatContact(profile)}</span>
+                        </div>
+                      </div>
+
+                      {profile.about_me && (
+                        <div className="border-t pt-3">
+                          <div className="flex items-start gap-2">
+                            <span className="text-blue-500 text-sm">💬</span>
+                            <div>
+                              <p className="text-sm font-semibold text-gray-700 mb-1">About:</p>
+                              <p className="text-sm text-gray-600 leading-relaxed">{profile.about_me}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+            </MapContainer>
+          )}
+
+          {!userLocation && (
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-900/80 via-purple-900/60 to-indigo-900/80 backdrop-blur-2xl flex items-center justify-center z-10 p-6">
+              <div className="relative group max-w-lg w-full">
+                <div className="absolute inset-0 bg-gradient-to-r from-violet-500/50 via-cyan-500/50 to-emerald-500/50 rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-500"></div>
+                <div className="relative backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/20 dark:border-white/10 p-10 rounded-3xl shadow-2xl text-center transform hover:scale-105 transition-all duration-500">
+                  <div className="relative mb-8">
+                    <div className="absolute inset-0 bg-gradient-to-r from-violet-400 to-cyan-400 rounded-full blur-2xl opacity-50 animate-pulse"></div>
+                    <div className="relative text-8xl animate-bounce">🗺️</div>
+                  </div>
+                  <h3 className="text-4xl font-black mb-4 bg-gradient-to-r from-violet-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
+                    Discover Your Community
+                  </h3>
+                  <p className="text-xl text-white/80 mb-8 leading-relaxed">
+                    Set your location to find and connect with <span className="font-bold text-cyan-300">Nepali community members</span> near you in Indiana.
+                  </p>
+                  <div className="space-y-6">
+                    <button
+                      onClick={handleGetLocation}
+                      className="group relative overflow-hidden w-full bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:via-purple-500 hover:to-indigo-500 text-white px-8 py-5 rounded-2xl font-bold text-xl shadow-2xl hover:shadow-violet-500/50 transform hover:scale-105 hover:-translate-y-2 transition-all duration-300 flex items-center justify-center gap-4"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="relative flex items-center gap-4">
+                        <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
+                          <span className="text-2xl">📍</span>
+                        </div>
+                        <span>Use My Current Location</span>
+                      </div>
+                    </button>
+                    <div className="flex items-center gap-4 text-white/60">
+                      <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
+                      <span className="font-medium">or use the search above</span>
+                      <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
                     </div>
                   </div>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
-        )
+      </div>
+    </div>
+    </div >
+  )
 }
