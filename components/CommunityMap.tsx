@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { supabase, Profile } from '../lib/supabase'
 import { geocodeLocation } from '../lib/geocoding'
@@ -10,59 +10,48 @@ const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapCo
 const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false })
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false })
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false })
-const Circle = dynamic(() => import('react-leaflet').then(mod => mod.Circle), { ssr: false })
 
-// Map bounds controller component
-const MapBoundsController = ({ userLocation, filteredProfiles }: {
-  userLocation: {lat: number, lng: number} | null,
+
+// Map bounds controller - only runs once when location is first set
+const MapBoundsController = ({ filteredProfiles, userLocation, shouldFitBounds }: {
   filteredProfiles: Profile[]
+  userLocation: { lat: number, lng: number } | null
+  shouldFitBounds: boolean
 }) => {
   useEffect(() => {
-    if (!userLocation) {
-      console.log('Skipping bounds fit - no user location')
-      return
-    }
+    if (!shouldFitBounds || filteredProfiles.length === 0) return
 
-    console.log('Fitting bounds for', filteredProfiles.length, 'profiles')
-
-    // Use a more reliable approach with global map reference
     const timeoutId = setTimeout(() => {
       if (typeof window !== 'undefined') {
-        // Find the map instance from the DOM
         const mapElement = document.querySelector('.leaflet-container')
         if (mapElement && (mapElement as any)._leaflet_map) {
           const map = (mapElement as any)._leaflet_map
           const L = require('leaflet')
-          
-          if (filteredProfiles.length === 0) {
-            console.log('No profiles, centering on user location')
-            map.setView([userLocation.lat, userLocation.lng], 11)
-            return
+
+          const bounds = L.latLngBounds()
+
+          // Add user location to bounds if it exists
+          if (userLocation) {
+            bounds.extend([userLocation.lat, userLocation.lng])
           }
-          
-          const bounds = L.latLngBounds([[userLocation.lat, userLocation.lng]])
+
+          // Add all profile locations to bounds
           filteredProfiles.forEach((profile: Profile) => {
             bounds.extend([profile.latitude, profile.longitude])
           })
-          
+
           if (bounds.isValid()) {
-            console.log('Fitting bounds for', filteredProfiles.length, 'profiles')
             map.fitBounds(bounds, {
               padding: [30, 30],
-              maxZoom: 13
+              maxZoom: 12
             })
-          } else {
-            console.log('Invalid bounds, centering on user location')
-            map.setView([userLocation.lat, userLocation.lng], 11)
           }
-        } else {
-          console.log('Map not found in DOM')
         }
       }
-    }, 1000) // Longer delay to ensure map is fully rendered
+    }, 500)
 
     return () => clearTimeout(timeoutId)
-  }, [userLocation, filteredProfiles])
+  }, [shouldFitBounds]) // Only depend on shouldFitBounds, not the profiles
 
   return null
 }
@@ -74,7 +63,7 @@ const useLeafletIcons = () => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const L = require('leaflet')
-      
+
       // Fix for default markers
       delete (L.Icon.Default.prototype as any)._getIconUrl
       L.Icon.Default.mergeOptions({
@@ -116,10 +105,11 @@ const useLeafletIcons = () => {
 export default function CommunityMap() {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [searchRadius, setSearchRadius] = useState(50)
-  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null)
+  const [userLocation, setUserLocation] = useState<{ lat: number, lng: number } | null>(null)
   const [loading, setLoading] = useState(true)
   const [locationInput, setLocationInput] = useState('')
   const [locationLoading, setLocationLoading] = useState(false)
+  const [shouldFitBounds, setShouldFitBounds] = useState(false)
   const icons = useLeafletIcons()
 
   const fetchProfiles = useCallback(async () => {
@@ -157,41 +147,31 @@ export default function CommunityMap() {
     const R = 3959 // Earth's radius in miles
     const dLat = (lat2 - lat1) * Math.PI / 180
     const dLng = (lng2 - lng1) * Math.PI / 180
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-      Math.sin(dLng/2) * Math.sin(dLng/2)
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2)
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
     return R * c
   }
 
-  const filteredProfiles = userLocation 
+  const filteredProfiles = userLocation
     ? profiles.filter(profile => {
-        const distance = calculateDistance(userLocation.lat, userLocation.lng, profile.latitude, profile.longitude)
-        console.log(`Profile ${profile.full_name}: distance = ${distance.toFixed(2)} miles, within ${searchRadius}? ${distance <= searchRadius}`)
-        return distance <= searchRadius
-      })
-    : profiles // TEMPORARY: Show all profiles for debugging when no location is set
-
-  console.log('Total profiles:', profiles.length, 'Filtered profiles:', filteredProfiles.length, 'User location:', userLocation)
-
-  // Group profiles by approximate area for privacy
-  const groupProfilesByArea = (profiles: Profile[]) => {
-    const groups: { [key: string]: Profile[] } = {}
-    
-    profiles.forEach(profile => {
-      // Round to 2 decimal places to group nearby profiles (~1km resolution)
-      const areaKey = `${Math.round(profile.latitude * 100)}_${Math.round(profile.longitude * 100)}`
-      if (!groups[areaKey]) {
-        groups[areaKey] = []
-      }
-      groups[areaKey].push(profile)
+      const distance = calculateDistance(userLocation.lat, userLocation.lng, profile.latitude, profile.longitude)
+      return distance <= searchRadius
     })
-    
-    return groups
-  }
+    : profiles
 
-  const profileGroups = groupProfilesByArea(filteredProfiles)
+  // Debug logging
+  console.log('Debug - Total profiles:', profiles.length)
+  console.log('Debug - Filtered profiles:', filteredProfiles.length)
+  console.log('Debug - User location:', userLocation)
+  console.log('Debug - Profile data:', filteredProfiles.map(p => ({
+    name: p.full_name,
+    lat: p.latitude,
+    lng: p.longitude,
+    hasValidCoords: !!(p.latitude && p.longitude)
+  })))
 
 
 
@@ -204,6 +184,7 @@ export default function CommunityMap() {
             lng: position.coords.longitude
           }
           setUserLocation(newLocation)
+          setShouldFitBounds(true)
         },
         (error) => {
           console.error('Error getting location:', error)
@@ -230,6 +211,7 @@ export default function CommunityMap() {
           lng: coordinates.lng
         }
         setUserLocation(newLocation)
+        setShouldFitBounds(true)
       } else {
         alert('Could not find location. Please try a different address or city name.')
       }
@@ -275,7 +257,7 @@ export default function CommunityMap() {
             >
               📍 Use My Location
             </button>
-            
+
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
               <span className="text-sm text-gray-500 dark:text-gray-400 text-center sm:text-left">or</span>
               <div className="flex gap-2">
@@ -318,9 +300,9 @@ export default function CommunityMap() {
                 </select>
               </div>
             )}
-            
+
             <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 text-center sm:text-left">
-              {userLocation 
+              {userLocation
                 ? `Showing ${filteredProfiles.length} members within ${searchRadius} miles`
                 : `${profiles.length} total members - set your location to find nearby ones`
               }
@@ -328,7 +310,10 @@ export default function CommunityMap() {
 
             {userLocation && (
               <button
-                onClick={() => setUserLocation(null)}
+                onClick={() => {
+                  setUserLocation(null)
+                  setShouldFitBounds(false)
+                }}
                 className="text-sm text-red-600 hover:text-red-800 underline text-center sm:text-left"
               >
                 Clear Location
@@ -347,16 +332,17 @@ export default function CommunityMap() {
             className="z-0"
 
           >
-            <MapBoundsController 
-              userLocation={userLocation} 
+            <MapBoundsController
               filteredProfiles={filteredProfiles}
+              userLocation={userLocation}
+              shouldFitBounds={shouldFitBounds}
             />
-            
+
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            
+
             {userLocation && icons && (
               <Marker position={[userLocation.lat, userLocation.lng]} icon={icons.userIcon}>
                 <Popup>
@@ -367,72 +353,32 @@ export default function CommunityMap() {
               </Marker>
             )}
 
-            {/* Render profiles based on privacy requirements */}
-            {Object.entries(profileGroups).map(([areaKey, groupProfiles]) => {
-              if (groupProfiles.length < 3) {
-                // For small groups (< 3 people), show privacy circle
-                const centerLat = groupProfiles.reduce((sum, p) => sum + p.latitude, 0) / groupProfiles.length
-                const centerLng = groupProfiles.reduce((sum, p) => sum + p.longitude, 0) / groupProfiles.length
-                
-                return (
-                  <Circle
-                    key={`privacy-${areaKey}`}
-                    center={[centerLat, centerLng]}
-                    radius={500} // 500m radius
-                    pathOptions={{
-                      color: '#3B82F6',
-                      fillColor: '#3B82F6',
-                      fillOpacity: 0.2,
-                      weight: 2
-                    }}
-                  >
-                    <Popup>
-                      <div className="p-2 max-w-xs">
-                        <h3 className="font-semibold text-lg mb-2">Community Area</h3>
-                        <p className="text-sm text-gray-600 mb-2">
-                          📍 {groupProfiles.length} member{groupProfiles.length > 1 ? 's' : ''} in this area
+            {/* Show all profiles as individual markers */}
+            {filteredProfiles
+              .filter(profile => profile.latitude && profile.longitude) // Only show profiles with valid coordinates
+              .map((profile) => (
+                <Marker
+                  key={profile.id}
+                  position={[profile.latitude, profile.longitude]}
+                  icon={icons?.communityIcon}
+                >
+                  <Popup>
+                    <div className="p-2 max-w-xs">
+                      <h3 className="font-semibold text-lg mb-2">{profile.full_name}</h3>
+                      <p className="text-sm text-gray-600 mb-2">📍 {profile.city_or_zip}</p>
+                      <p className="text-sm mb-2">📞 {formatContact(profile)}</p>
+                      {profile.about_me && (
+                        <p className="text-sm text-gray-700 mt-2">
+                          <strong>About:</strong> {profile.about_me}
                         </p>
-                        <p className="text-sm text-gray-500">
-                          Individual locations are private for small groups
-                        </p>
-                        <div className="mt-2 space-y-1">
-                          {groupProfiles.map(profile => (
-                            <div key={profile.id} className="text-xs">
-                              <strong>{profile.full_name}</strong> - {formatContact(profile)}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </Popup>
-                  </Circle>
-                )
-              } else {
-                // For larger groups (3+ people), show individual markers
-                return groupProfiles.map((profile) => (
-                  <Marker
-                    key={profile.id}
-                    position={[profile.latitude, profile.longitude]}
-                    icon={icons?.communityIcon}
-                  >
-                    <Popup>
-                      <div className="p-2 max-w-xs">
-                        <h3 className="font-semibold text-lg mb-2">{profile.full_name}</h3>
-                        <p className="text-sm text-gray-600 mb-2">📍 {profile.city_or_zip}</p>
-                        <p className="text-sm mb-2">📞 {formatContact(profile)}</p>
-                        {profile.about_me && (
-                          <p className="text-sm text-gray-700 mt-2">
-                            <strong>About:</strong> {profile.about_me}
-                          </p>
-                        )}
-                      </div>
-                    </Popup>
-                  </Marker>
-                ))
-              }
-            })}
+                      )}
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
           </MapContainer>
         )}
-        
+
         {!userLocation && (
           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10 p-4">
             <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-lg shadow-lg text-center max-w-sm sm:max-w-md w-full border dark:border-slate-700">
