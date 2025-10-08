@@ -12,67 +12,60 @@ const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { 
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false })
 const Circle = dynamic(() => import('react-leaflet').then(mod => mod.Circle), { ssr: false })
 
-// Simple map bounds controller using useMap hook
-const MapBoundsController = dynamic(() => Promise.resolve(({ userLocation, filteredProfiles }: {
+// Map bounds controller component
+const MapBoundsController = ({ userLocation, filteredProfiles }: {
   userLocation: {lat: number, lng: number} | null,
   filteredProfiles: Profile[]
 }) => {
-  const [map, setMap] = useState<any>(null)
-
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const { useMap } = require('react-leaflet')
-        const mapInstance = useMap()
-        setMap(mapInstance)
-        console.log('Map instance set:', !!mapInstance)
-      } catch (error) {
-        console.log('Map not ready yet:', error)
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!map || !userLocation) {
-      console.log('Skipping bounds fit - map:', !!map, 'userLocation:', !!userLocation)
+    if (!userLocation) {
+      console.log('Skipping bounds fit - no user location')
       return
     }
 
     console.log('Fitting bounds for', filteredProfiles.length, 'profiles')
 
+    // Use a more reliable approach with global map reference
     const timeoutId = setTimeout(() => {
       if (typeof window !== 'undefined') {
-        const L = require('leaflet')
-        
-        if (filteredProfiles.length === 0) {
-          console.log('No profiles, centering on user location')
-          map.setView([userLocation.lat, userLocation.lng], 11)
-          return
-        }
-        
-        const bounds = L.latLngBounds([[userLocation.lat, userLocation.lng]])
-        filteredProfiles.forEach((profile: Profile) => {
-          bounds.extend([profile.latitude, profile.longitude])
-        })
-        
-        if (bounds.isValid()) {
-          console.log('Fitting bounds:', bounds.toBBoxString())
-          map.fitBounds(bounds, {
-            padding: [30, 30],
-            maxZoom: 13
+        // Find the map instance from the DOM
+        const mapElement = document.querySelector('.leaflet-container')
+        if (mapElement && (mapElement as any)._leaflet_map) {
+          const map = (mapElement as any)._leaflet_map
+          const L = require('leaflet')
+          
+          if (filteredProfiles.length === 0) {
+            console.log('No profiles, centering on user location')
+            map.setView([userLocation.lat, userLocation.lng], 11)
+            return
+          }
+          
+          const bounds = L.latLngBounds([[userLocation.lat, userLocation.lng]])
+          filteredProfiles.forEach((profile: Profile) => {
+            bounds.extend([profile.latitude, profile.longitude])
           })
+          
+          if (bounds.isValid()) {
+            console.log('Fitting bounds for', filteredProfiles.length, 'profiles')
+            map.fitBounds(bounds, {
+              padding: [30, 30],
+              maxZoom: 13
+            })
+          } else {
+            console.log('Invalid bounds, centering on user location')
+            map.setView([userLocation.lat, userLocation.lng], 11)
+          }
         } else {
-          console.log('Invalid bounds, centering on user location')
-          map.setView([userLocation.lat, userLocation.lng], 11)
+          console.log('Map not found in DOM')
         }
       }
-    }, 500) // Increased delay to ensure map is ready
+    }, 1000) // Longer delay to ensure map is fully rendered
 
     return () => clearTimeout(timeoutId)
-  }, [map, userLocation, filteredProfiles])
+  }, [userLocation, filteredProfiles])
 
   return null
-}), { ssr: false })
+}
 
 // Custom hook to create Leaflet icons
 const useLeafletIcons = () => {
@@ -178,7 +171,7 @@ export default function CommunityMap() {
         console.log(`Profile ${profile.full_name}: distance = ${distance.toFixed(2)} miles, within ${searchRadius}? ${distance <= searchRadius}`)
         return distance <= searchRadius
       })
-    : [] // Show no markers when user location is not set
+    : profiles // TEMPORARY: Show all profiles for debugging when no location is set
 
   console.log('Total profiles:', profiles.length, 'Filtered profiles:', filteredProfiles.length, 'User location:', userLocation)
 
@@ -329,7 +322,7 @@ export default function CommunityMap() {
             <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 text-center sm:text-left">
               {userLocation 
                 ? `Showing ${filteredProfiles.length} members within ${searchRadius} miles`
-                : 'Set your location to find nearby members'
+                : `${profiles.length} total members - set your location to find nearby ones`
               }
             </div>
 
