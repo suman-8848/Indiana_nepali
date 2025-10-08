@@ -498,10 +498,6 @@ export default function CommunityMap() {
               zoomControl={true}
               attributionControl={false}
               preferCanvas={true}
-              tap={true}
-              tapTolerance={15}
-              bounceAtZoomLimits={false}
-              maxBoundsViscosity={0.8}
             >
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
