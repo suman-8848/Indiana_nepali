@@ -117,11 +117,17 @@ export default function CommunityMap() {
 
   // Function to fit map bounds to show user location and nearby members
   const fitMapBounds = useCallback(() => {
-    if (!mapRef.current || !userLocation || filteredProfiles.length === 0) return
+    if (!mapRef.current || !userLocation) return
 
     const map = mapRef.current
     if (typeof window !== 'undefined') {
       const L = require('leaflet')
+      
+      if (filteredProfiles.length === 0) {
+        // If no members found, just center on user location with reasonable zoom
+        map.setView([userLocation.lat, userLocation.lng], 11)
+        return
+      }
       
       // Create bounds that include user location and all filtered profiles
       const bounds = L.latLngBounds([
@@ -133,21 +139,28 @@ export default function CommunityMap() {
         bounds.extend([profile.latitude, profile.longitude])
       })
       
-      // Fit the map to these bounds with some padding
-      map.fitBounds(bounds, {
-        padding: [20, 20], // 20px padding on all sides
-        maxZoom: 12 // Don't zoom in too much for privacy
-      })
+      // Check if bounds are valid (not just a single point)
+      if (bounds.isValid()) {
+        // Fit the map to these bounds with some padding
+        map.fitBounds(bounds, {
+          padding: [30, 30], // 30px padding on all sides
+          maxZoom: 13 // Don't zoom in too much for privacy
+        })
+      } else {
+        // Fallback to center on user location
+        map.setView([userLocation.lat, userLocation.lng], 11)
+      }
     }
   }, [userLocation, filteredProfiles])
 
-  // Fit bounds when user location or filtered profiles change
+  // Fit bounds when user location, filtered profiles, or search radius changes
   useEffect(() => {
-    if (userLocation && filteredProfiles.length > 0) {
+    if (userLocation) {
       // Small delay to ensure map is ready
-      setTimeout(fitMapBounds, 100)
+      const timeoutId = setTimeout(fitMapBounds, 200)
+      return () => clearTimeout(timeoutId)
     }
-  }, [userLocation, filteredProfiles, fitMapBounds])
+  }, [userLocation, filteredProfiles, searchRadius, fitMapBounds])
 
   const handleGetLocation = () => {
     if (navigator.geolocation) {
@@ -215,7 +228,7 @@ export default function CommunityMap() {
   }
 
   const center: [number, number] = userLocation ? [userLocation.lat, userLocation.lng] : [39.7684, -86.1581]
-  const zoom = userLocation ? (filteredProfiles.length > 0 ? 10 : 12) : 7
+  const zoom = userLocation ? 11 : 7
 
   return (
     <div>
@@ -259,7 +272,10 @@ export default function CommunityMap() {
                 <label className="text-sm font-medium">Radius:</label>
                 <select
                   value={searchRadius}
-                  onChange={(e) => setSearchRadius(Number(e.target.value))}
+                  onChange={(e) => {
+                    const newRadius = Number(e.target.value)
+                    setSearchRadius(newRadius)
+                  }}
                   className="border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
                 >
                   <option value={10}>10 miles</option>
@@ -306,7 +322,15 @@ export default function CommunityMap() {
             zoom={zoom}
             style={{ height: '100%', width: '100%' }}
             className="z-0"
-            ref={mapRef}
+            ref={(map) => {
+              if (map) {
+                mapRef.current = map
+                // Trigger fit bounds when map is ready
+                map.whenReady(() => {
+                  setTimeout(fitMapBounds, 100)
+                })
+              }
+            }}
           >
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
