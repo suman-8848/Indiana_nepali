@@ -7,61 +7,12 @@ export default function Home() {
           <div className="text-center">
             {/* Flag and Title */}
             <div className="flex items-center justify-center gap-6 mb-8">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white dark:bg-gray-700 rounded-2xl flex items-center justify-center shadow-lg border border-gray-200 dark:border-gray-600">
-                <svg width="60" height="72" viewBox="0 0 60 72" className="w-14 h-17 sm:w-16 sm:h-19">
-                  {/* Nepal Flag - Accurate Recreation */}
-                  
-                  {/* Blue outer border */}
-                  <path d="M0 0 L36 0 L60 36 L36 36 L0 72 L0 0 Z" fill="#003893" stroke="#003893" stroke-width="1"/>
-                  
-                  {/* Red upper triangle */}
-                  <path d="M3 3 L33 3 L3 33 Z" fill="#DC143C"/>
-                  
-                  {/* Red lower triangle */}
-                  <path d="M3 39 L33 39 L3 69 Z" fill="#DC143C"/>
-                  
-                  {/* White sun in upper triangle */}
-                  <g transform="translate(18, 18)">
-                    {/* Sun rays - 12 pointed rays */}
-                    <g fill="white">
-                      <path d="M0,-8 L1.2,-5.5 L-1.2,-5.5 Z"/>
-                      <path d="M0,-8 L1.2,-5.5 L-1.2,-5.5 Z" transform="rotate(30)"/>
-                      <path d="M0,-8 L1.2,-5.5 L-1.2,-5.5 Z" transform="rotate(60)"/>
-                      <path d="M0,-8 L1.2,-5.5 L-1.2,-5.5 Z" transform="rotate(90)"/>
-                      <path d="M0,-8 L1.2,-5.5 L-1.2,-5.5 Z" transform="rotate(120)"/>
-                      <path d="M0,-8 L1.2,-5.5 L-1.2,-5.5 Z" transform="rotate(150)"/>
-                      <path d="M0,-8 L1.2,-5.5 L-1.2,-5.5 Z" transform="rotate(180)"/>
-                      <path d="M0,-8 L1.2,-5.5 L-1.2,-5.5 Z" transform="rotate(210)"/>
-                      <path d="M0,-8 L1.2,-5.5 L-1.2,-5.5 Z" transform="rotate(240)"/>
-                      <path d="M0,-8 L1.2,-5.5 L-1.2,-5.5 Z" transform="rotate(270)"/>
-                      <path d="M0,-8 L1.2,-5.5 L-1.2,-5.5 Z" transform="rotate(300)"/>
-                      <path d="M0,-8 L1.2,-5.5 L-1.2,-5.5 Z" transform="rotate(330)"/>
-                    </g>
-                    {/* Sun center circle */}
-                    <circle cx="0" cy="0" r="3.5" fill="white"/>
-                  </g>
-                  
-                  {/* White moon in lower triangle */}
-                  <g transform="translate(18, 54)">
-                    {/* Moon rays - 12 pointed rays */}
-                    <g fill="white">
-                      <path d="M0,-6 L1,-4 L-1,-4 Z"/>
-                      <path d="M0,-6 L1,-4 L-1,-4 Z" transform="rotate(30)"/>
-                      <path d="M0,-6 L1,-4 L-1,-4 Z" transform="rotate(60)"/>
-                      <path d="M0,-6 L1,-4 L-1,-4 Z" transform="rotate(90)"/>
-                      <path d="M0,-6 L1,-4 L-1,-4 Z" transform="rotate(120)"/>
-                      <path d="M0,-6 L1,-4 L-1,-4 Z" transform="rotate(150)"/>
-                      <path d="M0,-6 L1,-4 L-1,-4 Z" transform="rotate(180)"/>
-                      <path d="M0,-6 L1,-4 L-1,-4 Z" transform="rotate(210)"/>
-                      <path d="M0,-6 L1,-4 L-1,-4 Z" transform="rotate(240)"/>
-                      <path d="M0,-6 L1,-4 L-1,-4 Z" transform="rotate(270)"/>
-                      <path d="M0,-6 L1,-4 L-1,-4 Z" transform="rotate(300)"/>
-                      <path d="M0,-6 L1,-4 L-1,-4 Z" transform="rotate(330)"/>
-                    </g>
-                    {/* Moon crescent */}
-                    <path d="M-2.5,0 A2.5,2.5 0 1,1 2.5,0 A1.5,1.5 0 1,0 -2.5,0 Z" fill="white"/>
-                  </g>
-                </svg>
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white dark:bg-gray-700 rounded-2xl flex items-center justify-center shadow-lg border border-gray-200 dark:border-gray-600 p-2">
+                <img 
+                  src="/nepal-flag.svg" 
+                  alt="Nepal Flag" 
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div className="text-left">
                 <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white leading-tight">
