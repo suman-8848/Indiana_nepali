@@ -8,55 +8,59 @@ export default function Home() {
             {/* Flag and Title */}
             <div className="flex items-center justify-center gap-6 mb-8">
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white dark:bg-gray-700 rounded-2xl flex items-center justify-center shadow-lg border border-gray-200 dark:border-gray-600">
-                <svg width="48" height="40" viewBox="0 0 48 40" className="w-12 h-10 sm:w-14 sm:h-12">
+                <svg width="60" height="48" viewBox="0 0 60 48" className="w-14 h-11 sm:w-16 sm:h-13">
+                  {/* Nepal Flag - Exact Recreation - Large Version */}
                   <defs>
-                    <clipPath id="nepal-flag-hero">
-                      <path d="M0 0L24 0L48 20L24 20L0 40Z"/>
+                    <clipPath id="nepal-flag-hero-clip">
+                      <path d="M4 4 L30 4 L56 24 L30 24 L4 44 L4 4 Z"/>
                     </clipPath>
                   </defs>
-                  <g clipPath="url(#nepal-flag-hero)">
-                    {/* Blue border background */}
-                    <rect width="48" height="40" fill="#003893"/>
-                    {/* Red triangles */}
-                    <path d="M2 2L22 2L2 18Z" fill="#DC143C"/>
-                    <path d="M2 22L22 22L2 38Z" fill="#DC143C"/>
-                    {/* Blue borders */}
-                    <path d="M0 0L24 0L48 20L24 20L0 40L0 0Z" fill="none" stroke="#003893" strokeWidth="2"/>
-                    
-                    {/* Sun symbol in upper triangle */}
-                    <g transform="translate(12, 10)">
-                      {/* Sun rays */}
-                      <g fill="white">
-                        <path d="M0,-4 L0.6,-3 L-0.6,-3 Z"/>
-                        <path d="M2.8,-2.8 L2.2,-1.6 L1.6,-2.2 Z"/>
-                        <path d="M4,0 L3,0.6 L3,-0.6 Z"/>
-                        <path d="M2.8,2.8 L1.6,2.2 L2.2,1.6 Z"/>
-                        <path d="M0,4 L-0.6,3 L0.6,3 Z"/>
-                        <path d="M-2.8,2.8 L-1.6,2.2 L-2.2,1.6 Z"/>
-                        <path d="M-4,0 L-3,-0.6 L-3,0.6 Z"/>
-                        <path d="M-2.8,-2.8 L-2.2,-1.6 L-1.6,-2.2 Z"/>
-                      </g>
-                      {/* Sun center */}
-                      <circle cx="0" cy="0" r="1.6" fill="white"/>
+                  
+                  {/* Blue outer border */}
+                  <path d="M0 0 L30 0 L60 24 L30 24 L0 48 L0 0 Z" fill="#003893"/>
+                  
+                  {/* Red inner triangles */}
+                  <path d="M4 4 L26 4 L4 20 Z" fill="#DC143C"/>
+                  <path d="M4 28 L26 28 L4 44 Z" fill="#DC143C"/>
+                  
+                  {/* White sun in upper triangle */}
+                  <g transform="translate(15, 12)">
+                    {/* Sun rays - 12 pointed star */}
+                    <g fill="white">
+                      <polygon points="0,-5 0.6,-3.6 -0.6,-3.6"/>
+                      <polygon points="2.5,-4.33 3.6,-2.5 2.12,-3.12"/>
+                      <polygon points="4.33,-2.5 5,0 3.6,-0.6"/>
+                      <polygon points="4.33,2.5 3.6,0.6 5,0"/>
+                      <polygon points="2.5,4.33 2.12,3.12 3.6,2.5"/>
+                      <polygon points="0,5 -0.6,3.6 0.6,3.6"/>
+                      <polygon points="-2.5,4.33 -2.12,3.12 -3.6,2.5"/>
+                      <polygon points="-4.33,2.5 -3.6,0.6 -5,0"/>
+                      <polygon points="-4.33,-2.5 -5,0 -3.6,-0.6"/>
+                      <polygon points="-2.5,-4.33 -3.6,-2.5 -2.12,-3.12"/>
                     </g>
-                    
-                    {/* Moon symbol in lower triangle */}
-                    <g transform="translate(12, 30)">
-                      {/* Moon rays */}
-                      <g fill="white">
-                        <path d="M0,-3 L0.4,-2.4 L-0.4,-2.4 Z"/>
-                        <path d="M2,-2 L1.6,-1.2 L1.2,-1.6 Z"/>
-                        <path d="M3,0 L2.4,0.4 L2.4,-0.4 Z"/>
-                        <path d="M2,2 L1.2,1.6 L1.6,1.2 Z"/>
-                        <path d="M0,3 L-0.4,2.4 L0.4,2.4 Z"/>
-                        <path d="M-2,2 L-1.2,1.6 L-1.6,1.2 Z"/>
-                        <path d="M-3,0 L-2.4,-0.4 L-2.4,0.4 Z"/>
-                        <path d="M-2,-2 L-1.6,-1.2 L-1.2,-1.6 Z"/>
-                      </g>
-                      {/* Moon face */}
-                      <path d="M-1.2,0 A1.2,1.2 0 1,1 1.2,0 A0.8,0.8 0 1,0 -1.2,0" fill="white"/>
-                    </g>
+                    {/* Sun center circle */}
+                    <circle cx="0" cy="0" r="2.4" fill="white"/>
                   </g>
+                  
+                  {/* White moon in lower triangle */}
+                  <g transform="translate(15, 36)">
+                    {/* Moon rays - 8 pointed star */}
+                    <g fill="white">
+                      <polygon points="0,-4 0.4,-3 -0.4,-3"/>
+                      <polygon points="2.8,-2.8 3,-2 2,-2.4"/>
+                      <polygon points="4,0 3,0.4 3,-0.4"/>
+                      <polygon points="2.8,2.8 2,2.4 3,2"/>
+                      <polygon points="0,4 -0.4,3 0.4,3"/>
+                      <polygon points="-2.8,2.8 -2,2.4 -3,2"/>
+                      <polygon points="-4,0 -3,-0.4 -3,0.4"/>
+                      <polygon points="-2.8,-2.8 -3,-2 -2,-2.4"/>
+                    </g>
+                    {/* Moon crescent */}
+                    <path d="M-2,0 A2,2 0 1,1 2,0 A1.2,1.2 0 1,0 -2,0 Z" fill="white"/>
+                  </g>
+                  
+                  {/* Blue border outline */}
+                  <path d="M0 0 L30 0 L60 24 L30 24 L0 48 L0 0 Z" fill="none" stroke="#003893" strokeWidth="1"/>
                 </svg>
               </div>
               <div className="text-left">
