@@ -11,6 +11,66 @@ const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLaye
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false })
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false })
 
+// Map controller component to handle bounds fitting
+const MapController = dynamic(() => Promise.resolve(({ userLocation, filteredProfiles }: { 
+  userLocation: {lat: number, lng: number} | null, 
+  filteredProfiles: Profile[] 
+}) => {
+  const [mapInstance, setMapInstance] = useState<any>(null)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const { useMap } = require('react-leaflet')
+      try {
+        const map = useMap()
+        setMapInstance(map)
+      } catch (error) {
+        console.log('Map not ready yet')
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!mapInstance || !userLocation) return
+
+    const timeoutId = setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        const L = require('leaflet')
+        
+        if (filteredProfiles.length === 0) {
+          // If no members found, just center on user location
+          mapInstance.setView([userLocation.lat, userLocation.lng], 11)
+          return
+        }
+        
+        // Create bounds that include user location and all filtered profiles
+        const bounds = L.latLngBounds([
+          [userLocation.lat, userLocation.lng]
+        ])
+        
+        // Add all filtered profile locations to bounds
+        filteredProfiles.forEach(profile => {
+          bounds.extend([profile.latitude, profile.longitude])
+        })
+        
+        // Fit the map to these bounds with padding
+        if (bounds.isValid()) {
+          mapInstance.fitBounds(bounds, {
+            padding: [30, 30],
+            maxZoom: 13
+          })
+        } else {
+          mapInstance.setView([userLocation.lat, userLocation.lng], 11)
+        }
+      }
+    }, 300)
+
+    return () => clearTimeout(timeoutId)
+  }, [mapInstance, userLocation, filteredProfiles])
+
+  return null
+}), { ssr: false })
+
 // Custom hook to create Leaflet icons
 const useLeafletIcons = () => {
   const [icons, setIcons] = useState<any>(null)
@@ -64,7 +124,6 @@ export default function CommunityMap() {
   const [loading, setLoading] = useState(true)
   const [locationInput, setLocationInput] = useState('')
   const [locationLoading, setLocationLoading] = useState(false)
-  const mapRef = useRef<any>(null)
   const icons = useLeafletIcons()
 
   const fetchProfiles = useCallback(async () => {
@@ -115,52 +174,7 @@ export default function CommunityMap() {
       )
     : [] // Show no markers when user location is not set
 
-  // Function to fit map bounds to show user location and nearby members
-  const fitMapBounds = useCallback(() => {
-    if (!mapRef.current || !userLocation) return
 
-    const map = mapRef.current
-    if (typeof window !== 'undefined') {
-      const L = require('leaflet')
-      
-      if (filteredProfiles.length === 0) {
-        // If no members found, just center on user location with reasonable zoom
-        map.setView([userLocation.lat, userLocation.lng], 11)
-        return
-      }
-      
-      // Create bounds that include user location and all filtered profiles
-      const bounds = L.latLngBounds([
-        [userLocation.lat, userLocation.lng] // Start with user location
-      ])
-      
-      // Add all filtered profile locations to bounds
-      filteredProfiles.forEach(profile => {
-        bounds.extend([profile.latitude, profile.longitude])
-      })
-      
-      // Check if bounds are valid (not just a single point)
-      if (bounds.isValid()) {
-        // Fit the map to these bounds with some padding
-        map.fitBounds(bounds, {
-          padding: [30, 30], // 30px padding on all sides
-          maxZoom: 13 // Don't zoom in too much for privacy
-        })
-      } else {
-        // Fallback to center on user location
-        map.setView([userLocation.lat, userLocation.lng], 11)
-      }
-    }
-  }, [userLocation, filteredProfiles])
-
-  // Fit bounds when user location, filtered profiles, or search radius changes
-  useEffect(() => {
-    if (userLocation) {
-      // Small delay to ensure map is ready
-      const timeoutId = setTimeout(fitMapBounds, 200)
-      return () => clearTimeout(timeoutId)
-    }
-  }, [userLocation, filteredProfiles, searchRadius, fitMapBounds])
 
   const handleGetLocation = () => {
     if (navigator.geolocation) {
@@ -294,22 +308,12 @@ export default function CommunityMap() {
             </div>
 
             {userLocation && (
-              <>
-                {filteredProfiles.length > 0 && (
-                  <button
-                    onClick={fitMapBounds}
-                    className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline text-center sm:text-left"
-                  >
-                    Fit to Members
-                  </button>
-                )}
-                <button
-                  onClick={() => setUserLocation(null)}
-                  className="text-sm text-red-600 hover:text-red-800 underline text-center sm:text-left"
-                >
-                  Clear Location
-                </button>
-              </>
+              <button
+                onClick={() => setUserLocation(null)}
+                className="text-sm text-red-600 hover:text-red-800 underline text-center sm:text-left"
+              >
+                Clear Location
+              </button>
             )}
           </div>
         </div>
@@ -322,16 +326,8 @@ export default function CommunityMap() {
             zoom={zoom}
             style={{ height: '100%', width: '100%' }}
             className="z-0"
-            ref={(map) => {
-              if (map) {
-                mapRef.current = map
-                // Trigger fit bounds when map is ready
-                map.whenReady(() => {
-                  setTimeout(fitMapBounds, 100)
-                })
-              }
-            }}
           >
+            <MapController userLocation={userLocation} filteredProfiles={filteredProfiles} />
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
