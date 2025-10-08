@@ -129,10 +129,10 @@ export default function CommunityMap() {
 
   const filteredProfiles = userLocation
     ? profiles.filter(profile => {
-      if (!profile.latitude || !profile.longitude) return false
-      const distance = calculateDistance(userLocation.lat, userLocation.lng, profile.latitude, profile.longitude)
-      return distance <= searchRadius
-    })
+        if (!profile.latitude || !profile.longitude) return false
+        const distance = calculateDistance(userLocation.lat, userLocation.lng, profile.latitude, profile.longitude)
+        return distance <= searchRadius
+      })
     : profiles.filter(profile => profile.latitude && profile.longitude)
 
   // Group profiles by location and create offset positions
@@ -405,7 +405,6 @@ export default function CommunityMap() {
             </div>
           </div>
         </div>
-
       </div>
 
       {/* Futuristic Map Container */}
@@ -530,6 +529,5 @@ export default function CommunityMap() {
         </div>
       </div>
     </div>
-    </div >
   )
 }
