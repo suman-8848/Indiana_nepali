@@ -10,7 +10,7 @@ const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapCo
 const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false })
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false })
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false })
-const MarkerClusterGroup = dynamic(() => import('react-leaflet-cluster'), { ssr: false })
+const Circle = dynamic(() => import('react-leaflet').then(mod => mod.Circle), { ssr: false })
 
 // Simple map bounds controller
 const MapBoundsController = ({ userLocation, filteredProfiles, searchRadius }: {
@@ -167,6 +167,24 @@ export default function CommunityMap() {
         calculateDistance(userLocation.lat, userLocation.lng, profile.latitude, profile.longitude) <= searchRadius
       )
     : [] // Show no markers when user location is not set
+
+  // Group profiles by approximate area for privacy
+  const groupProfilesByArea = (profiles: Profile[]) => {
+    const groups: { [key: string]: Profile[] } = {}
+    
+    profiles.forEach(profile => {
+      // Round to 2 decimal places to group nearby profiles (~1km resolution)
+      const areaKey = `${Math.round(profile.latitude * 100)}_${Math.round(profile.longitude * 100)}`
+      if (!groups[areaKey]) {
+        groups[areaKey] = []
+      }
+      groups[areaKey].push(profile)
+    })
+    
+    return groups
+  }
+
+  const profileGroups = groupProfilesByArea(filteredProfiles)
 
 
 
@@ -343,43 +361,69 @@ export default function CommunityMap() {
               </Marker>
             )}
 
-            <MarkerClusterGroup
-              chunkedLoading
-              iconCreateFunction={(cluster: any) => {
-                const count = cluster.getChildCount()
-                let size = 'small'
-                if (count >= 10) size = 'large'
-                else if (count >= 5) size = 'medium'
+            {/* Render profiles based on privacy requirements */}
+            {Object.entries(profileGroups).map(([areaKey, groupProfiles]) => {
+              if (groupProfiles.length < 3) {
+                // For small groups (< 3 people), show privacy circle
+                const centerLat = groupProfiles.reduce((sum, p) => sum + p.latitude, 0) / groupProfiles.length
+                const centerLng = groupProfiles.reduce((sum, p) => sum + p.longitude, 0) / groupProfiles.length
                 
-                return typeof window !== 'undefined' ? 
-                  require('leaflet').divIcon({
-                    html: `<div class="cluster-marker cluster-${size}"><span>${count}</span></div>`,
-                    className: 'custom-cluster-icon',
-                    iconSize: [40, 40]
-                  }) : null
-              }}
-            >
-              {filteredProfiles.map((profile) => (
-                <Marker
-                  key={profile.id}
-                  position={[profile.latitude, profile.longitude]}
-                  icon={icons?.communityIcon}
-                >
-                  <Popup>
-                    <div className="p-2 max-w-xs">
-                      <h3 className="font-semibold text-lg mb-2">{profile.full_name}</h3>
-                      <p className="text-sm text-gray-600 mb-2">📍 {profile.city_or_zip}</p>
-                      <p className="text-sm mb-2">📞 {formatContact(profile)}</p>
-                      {profile.about_me && (
-                        <p className="text-sm text-gray-700 mt-2">
-                          <strong>About:</strong> {profile.about_me}
+                return (
+                  <Circle
+                    key={`privacy-${areaKey}`}
+                    center={[centerLat, centerLng]}
+                    radius={500} // 500m radius
+                    pathOptions={{
+                      color: '#3B82F6',
+                      fillColor: '#3B82F6',
+                      fillOpacity: 0.2,
+                      weight: 2
+                    }}
+                  >
+                    <Popup>
+                      <div className="p-2 max-w-xs">
+                        <h3 className="font-semibold text-lg mb-2">Community Area</h3>
+                        <p className="text-sm text-gray-600 mb-2">
+                          📍 {groupProfiles.length} member{groupProfiles.length > 1 ? 's' : ''} in this area
                         </p>
-                      )}
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
-            </MarkerClusterGroup>
+                        <p className="text-sm text-gray-500">
+                          Individual locations are private for small groups
+                        </p>
+                        <div className="mt-2 space-y-1">
+                          {groupProfiles.map(profile => (
+                            <div key={profile.id} className="text-xs">
+                              <strong>{profile.full_name}</strong> - {formatContact(profile)}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </Popup>
+                  </Circle>
+                )
+              } else {
+                // For larger groups (3+ people), show individual markers
+                return groupProfiles.map((profile) => (
+                  <Marker
+                    key={profile.id}
+                    position={[profile.latitude, profile.longitude]}
+                    icon={icons?.communityIcon}
+                  >
+                    <Popup>
+                      <div className="p-2 max-w-xs">
+                        <h3 className="font-semibold text-lg mb-2">{profile.full_name}</h3>
+                        <p className="text-sm text-gray-600 mb-2">📍 {profile.city_or_zip}</p>
+                        <p className="text-sm mb-2">📞 {formatContact(profile)}</p>
+                        {profile.about_me && (
+                          <p className="text-sm text-gray-700 mt-2">
+                            <strong>About:</strong> {profile.about_me}
+                          </p>
+                        )}
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))
+              }
+            })}
           </MapContainer>
         )}
         

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { geocodeLocation } from '../../lib/geocoding'
+import { geocodeLocationWithOffset } from '../../lib/geocoding'
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -29,31 +29,51 @@ export default function Register() {
     }
 
     try {
-      // Geocode the location
-      const coordinates = await geocodeLocation(formData.cityOrZip)
-      if (!coordinates) {
-        setMessage('Could not find location. Please check your city or ZIP code.')
-        setLoading(false)
-        return
-      }
-
-      // Insert profile data
-      const { error } = await supabase
+      // First insert the profile to get the user ID for deterministic offset
+      const { data: profileData, error: insertError } = await supabase
         .from('profiles')
         .insert({
           full_name: formData.fullName,
           city_or_zip: formData.cityOrZip,
-          latitude: coordinates.lat,
-          longitude: coordinates.lng,
+          latitude: 0, // Temporary placeholder
+          longitude: 0, // Temporary placeholder
           contact_type: formData.contactType,
           contact_value: formData.contactValue,
           about_me: formData.aboutMe || null,
           consent_to_share: formData.consentToShare
         })
+        .select()
+        .single()
 
-      if (error) {
+      if (insertError || !profileData) {
         setMessage('Error registering. Please try again.')
-        console.error('Registration error:', error)
+        console.error('Registration error:', insertError)
+        setLoading(false)
+        return
+      }
+
+      // Now geocode with deterministic offset using the profile ID
+      const coordinates = await geocodeLocationWithOffset(formData.cityOrZip, profileData.id)
+      if (!coordinates) {
+        // Clean up the profile if geocoding fails
+        await supabase.from('profiles').delete().eq('id', profileData.id)
+        setMessage('Could not find location. Please check your city or ZIP code.')
+        setLoading(false)
+        return
+      }
+
+      // Update the profile with the actual coordinates
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          latitude: coordinates.lat,
+          longitude: coordinates.lng
+        })
+        .eq('id', profileData.id)
+
+      if (updateError) {
+        setMessage('Error updating location. Please try again.')
+        console.error('Location update error:', updateError)
       } else {
         setMessage('Registration successful! You can now be found by other community members.')
         setFormData({
