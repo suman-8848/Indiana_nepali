@@ -1,58 +1,65 @@
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-cyan-50 to-emerald-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-violet-600/10 via-cyan-600/10 to-emerald-600/10 blur-3xl"></div>
-        <div className="relative max-w-7xl mx-auto px-4 py-16 sm:py-24">
+      <div className="relative overflow-hidden bg-white dark:bg-gray-800">
+        <div className="max-w-7xl mx-auto px-4 py-16 sm:py-24">
           <div className="text-center">
             {/* Flag and Title */}
             <div className="flex items-center justify-center gap-6 mb-8">
-              <div className="w-20 h-20 bg-gradient-to-br from-red-500 via-blue-500 to-red-500 rounded-2xl flex items-center justify-center text-4xl shadow-2xl transform hover:scale-110 transition-transform duration-300">
-                🇳🇵
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white dark:bg-gray-700 rounded-2xl flex items-center justify-center shadow-lg border border-gray-200 dark:border-gray-600">
+                <svg width="48" height="40" viewBox="0 0 48 40" className="w-12 h-10 sm:w-14 sm:h-12">
+                  <defs>
+                    <clipPath id="nepal-flag-hero">
+                      <path d="M0 0L24 0L48 20L24 20L0 40Z"/>
+                    </clipPath>
+                  </defs>
+                  <g clipPath="url(#nepal-flag-hero)">
+                    <rect width="48" height="40" fill="#003893"/>
+                    <path d="M0 0L24 0L0 20Z" fill="#DC143C"/>
+                    <path d="M0 20L24 20L0 40Z" fill="#DC143C"/>
+                    <path d="M0 0L24 0L48 20L24 20L0 40L0 0Z" fill="none" stroke="white" strokeWidth="1"/>
+                    <circle cx="12" cy="10" r="3" fill="white"/>
+                    <path d="M8 26 Q12 22 16 26 Q12 30 8 26" fill="white"/>
+                  </g>
+                </svg>
               </div>
               <div className="text-left">
-                <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black bg-gradient-to-r from-violet-600 via-cyan-600 to-emerald-600 bg-clip-text text-transparent leading-tight">
+                <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white leading-tight">
                   Nepali Community
                 </h1>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-700 dark:text-gray-300 mt-2">
+                <p className="text-2xl sm:text-3xl font-semibold text-blue-600 dark:text-blue-400 mt-2">
                   Indiana
                 </p>
               </div>
             </div>
 
             {/* Subtitle */}
-            <p className="text-xl sm:text-2xl text-gray-700 dark:text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
-              Connect with fellow <span className="font-bold text-violet-600 dark:text-violet-400">Nepali people</span> living in Indiana. 
+            <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
+              Connect with fellow <span className="font-semibold text-blue-600 dark:text-blue-400">Nepali people</span> living in Indiana. 
               Build meaningful relationships and find your home away from home.
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
               <a 
                 href="/map" 
-                className="group relative overflow-hidden bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:via-purple-500 hover:to-indigo-500 text-white px-10 py-5 rounded-2xl font-bold text-xl shadow-2xl hover:shadow-violet-500/25 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 flex items-center gap-4"
+                className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center gap-3"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative flex items-center gap-4">
-                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                    <span className="text-2xl">🗺️</span>
-                  </div>
-                  <span>Explore Community Map</span>
-                </div>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                </svg>
+                <span>Explore Community Map</span>
               </a>
 
               <a 
                 href="/register" 
-                className="group relative overflow-hidden bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-500 hover:from-emerald-400 hover:via-cyan-400 hover:to-blue-400 text-white px-10 py-5 rounded-2xl font-bold text-xl shadow-2xl hover:shadow-emerald-500/25 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 flex items-center gap-4"
+                className="bg-gray-800 hover:bg-gray-900 dark:bg-gray-600 dark:hover:bg-gray-500 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center gap-3"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative flex items-center gap-4">
-                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                    <span className="text-2xl">👥</span>
-                  </div>
-                  <span>Join Community</span>
-                </div>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+                <span>Join Community</span>
               </a>
             </div>
           </div>
