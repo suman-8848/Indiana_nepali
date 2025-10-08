@@ -21,10 +21,15 @@ const MapBoundsController = ({ filteredProfiles, userLocation, shouldFitBounds }
   useEffect(() => {
     if (!shouldFitBounds || filteredProfiles.length === 0) return
 
+    console.log('Fitting bounds for', filteredProfiles.length, 'profiles')
+
     const timeoutId = setTimeout(() => {
       if (typeof window !== 'undefined') {
         const mapElement = document.querySelector('.leaflet-container')
+        console.log('Map element found:', !!mapElement)
+
         if (mapElement && (mapElement as any)._leaflet_map) {
+          console.log('Leaflet map instance found')
           const map = (mapElement as any)._leaflet_map
           const L = require('leaflet')
 
@@ -33,22 +38,31 @@ const MapBoundsController = ({ filteredProfiles, userLocation, shouldFitBounds }
           // Add user location to bounds if it exists
           if (userLocation) {
             bounds.extend([userLocation.lat, userLocation.lng])
+            console.log('Added user location to bounds')
           }
 
           // Add all profile locations to bounds
-          filteredProfiles.forEach((profile: Profile) => {
+          const validProfiles = filteredProfiles.filter(p => p.latitude && p.longitude)
+          validProfiles.forEach((profile: Profile) => {
             bounds.extend([profile.latitude, profile.longitude])
           })
 
+          console.log('Added', validProfiles.length, 'profile locations to bounds')
+
           if (bounds.isValid()) {
+            console.log('Bounds are valid, fitting map')
             map.fitBounds(bounds, {
               padding: [30, 30],
               maxZoom: 12
             })
+          } else {
+            console.log('Bounds are not valid')
           }
+        } else {
+          console.log('Map not found in DOM')
         }
       }
-    }, 500)
+    }, 1500) // Longer delay to ensure map is fully loaded
 
     return () => clearTimeout(timeoutId)
   }, [shouldFitBounds]) // Only depend on shouldFitBounds, not the profiles
@@ -166,12 +180,12 @@ export default function CommunityMap() {
   console.log('Debug - Total profiles:', profiles.length)
   console.log('Debug - Filtered profiles:', filteredProfiles.length)
   console.log('Debug - User location:', userLocation)
-  console.log('Debug - Profile data:', filteredProfiles.map(p => ({
-    name: p.full_name,
-    lat: p.latitude,
-    lng: p.longitude,
-    hasValidCoords: !!(p.latitude && p.longitude)
-  })))
+  console.log('Debug - Icons loaded:', !!icons)
+
+  // More detailed profile debugging
+  filteredProfiles.forEach(profile => {
+    console.log(`Profile ${profile.full_name}: lat=${profile.latitude}, lng=${profile.longitude}, hasCoords=${!!(profile.latitude && profile.longitude)}`)
+  })
 
 
 
@@ -354,28 +368,35 @@ export default function CommunityMap() {
             )}
 
             {/* Show all profiles as individual markers */}
-            {filteredProfiles
-              .filter(profile => profile.latitude && profile.longitude) // Only show profiles with valid coordinates
-              .map((profile) => (
-                <Marker
-                  key={profile.id}
-                  position={[profile.latitude, profile.longitude]}
-                  icon={icons?.communityIcon}
-                >
-                  <Popup>
-                    <div className="p-2 max-w-xs">
-                      <h3 className="font-semibold text-lg mb-2">{profile.full_name}</h3>
-                      <p className="text-sm text-gray-600 mb-2">📍 {profile.city_or_zip}</p>
-                      <p className="text-sm mb-2">📞 {formatContact(profile)}</p>
-                      {profile.about_me && (
-                        <p className="text-sm text-gray-700 mt-2">
-                          <strong>About:</strong> {profile.about_me}
-                        </p>
-                      )}
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
+            {icons && filteredProfiles
+              .filter(profile => {
+                const hasCoords = !!(profile.latitude && profile.longitude)
+                console.log(`Rendering check for ${profile.full_name}: hasCoords=${hasCoords}, lat=${profile.latitude}, lng=${profile.longitude}`)
+                return hasCoords
+              })
+              .map((profile) => {
+                console.log(`Rendering marker for ${profile.full_name} at [${profile.latitude}, ${profile.longitude}]`)
+                return (
+                  <Marker
+                    key={profile.id}
+                    position={[profile.latitude, profile.longitude]}
+                    icon={icons.communityIcon}
+                  >
+                    <Popup>
+                      <div className="p-2 max-w-xs">
+                        <h3 className="font-semibold text-lg mb-2">{profile.full_name}</h3>
+                        <p className="text-sm text-gray-600 mb-2">📍 {profile.city_or_zip}</p>
+                        <p className="text-sm mb-2">📞 {formatContact(profile)}</p>
+                        {profile.about_me && (
+                          <p className="text-sm text-gray-700 mt-2">
+                            <strong>About:</strong> {profile.about_me}
+                          </p>
+                        )}
+                      </div>
+                    </Popup>
+                  </Marker>
+                )
+              })}
           </MapContainer>
         )}
 
