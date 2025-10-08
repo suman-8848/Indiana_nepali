@@ -13,24 +13,55 @@ export default function Navbar() {
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform duration-300 border border-gray-200/50 dark:border-gray-700/50">
               <svg width="24" height="20" viewBox="0 0 24 20" className="w-6 h-5 sm:w-7 sm:h-6">
-                {/* Nepal Flag SVG */}
+                {/* Nepal Flag SVG - Accurate Design */}
                 <defs>
                   <clipPath id="nepal-flag">
                     <path d="M0 0L12 0L24 10L12 10L0 20Z"/>
                   </clipPath>
                 </defs>
                 <g clipPath="url(#nepal-flag)">
-                  {/* Blue background */}
+                  {/* Blue border background */}
                   <rect width="24" height="20" fill="#003893"/>
                   {/* Red triangles */}
-                  <path d="M0 0L12 0L0 10Z" fill="#DC143C"/>
-                  <path d="M0 10L12 10L0 20Z" fill="#DC143C"/>
-                  {/* White border */}
-                  <path d="M0 0L12 0L24 10L12 10L0 20L0 0Z" fill="none" stroke="white" strokeWidth="0.5"/>
-                  {/* Sun symbol (simplified) */}
-                  <circle cx="6" cy="5" r="1.5" fill="white"/>
-                  {/* Moon symbol (simplified) */}
-                  <path d="M4 13 Q6 11 8 13 Q6 15 4 13" fill="white"/>
+                  <path d="M1 1L11 1L1 9Z" fill="#DC143C"/>
+                  <path d="M1 11L11 11L1 19Z" fill="#DC143C"/>
+                  {/* Blue borders */}
+                  <path d="M0 0L12 0L24 10L12 10L0 20L0 0Z" fill="none" stroke="#003893" strokeWidth="1"/>
+                  
+                  {/* Sun symbol in upper triangle */}
+                  <g transform="translate(6, 5)">
+                    {/* Sun rays */}
+                    <g fill="white">
+                      <path d="M0,-2 L0.3,-1.5 L-0.3,-1.5 Z"/>
+                      <path d="M1.4,-1.4 L1.1,-0.8 L0.8,-1.1 Z"/>
+                      <path d="M2,0 L1.5,0.3 L1.5,-0.3 Z"/>
+                      <path d="M1.4,1.4 L0.8,1.1 L1.1,0.8 Z"/>
+                      <path d="M0,2 L-0.3,1.5 L0.3,1.5 Z"/>
+                      <path d="M-1.4,1.4 L-0.8,1.1 L-1.1,0.8 Z"/>
+                      <path d="M-2,0 L-1.5,-0.3 L-1.5,0.3 Z"/>
+                      <path d="M-1.4,-1.4 L-1.1,-0.8 L-0.8,-1.1 Z"/>
+                    </g>
+                    {/* Sun center */}
+                    <circle cx="0" cy="0" r="0.8" fill="white"/>
+                  </g>
+                  
+                  {/* Moon symbol in lower triangle */}
+                  <g transform="translate(6, 15)">
+                    {/* Moon crescent with sun rays */}
+                    <g fill="white">
+                      {/* Moon rays */}
+                      <path d="M0,-1.5 L0.2,-1.2 L-0.2,-1.2 Z"/>
+                      <path d="M1,-1 L0.8,-0.6 L0.6,-0.8 Z"/>
+                      <path d="M1.5,0 L1.2,0.2 L1.2,-0.2 Z"/>
+                      <path d="M1,1 L0.6,0.8 L0.8,0.6 Z"/>
+                      <path d="M0,1.5 L-0.2,1.2 L0.2,1.2 Z"/>
+                      <path d="M-1,1 L-0.6,0.8 L-0.8,0.6 Z"/>
+                      <path d="M-1.5,0 L-1.2,-0.2 L-1.2,0.2 Z"/>
+                      <path d="M-1,-1 L-0.8,-0.6 L-0.6,-0.8 Z"/>
+                    </g>
+                    {/* Moon face */}
+                    <path d="M-0.6,0 A0.6,0.6 0 1,1 0.6,0 A0.4,0.4 0 1,0 -0.6,0" fill="white"/>
+                  </g>
                 </g>
               </svg>
             </div>
