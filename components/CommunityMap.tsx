@@ -218,10 +218,25 @@ export default function CommunityMap() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-300 text-lg">Loading community members...</p>
+      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-cyan-50 to-emerald-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900 flex items-center justify-center p-4">
+        <div className="relative group">
+          <div className="absolute inset-0 bg-gradient-to-r from-violet-500/30 via-cyan-500/30 to-emerald-500/30 rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-500"></div>
+          <div className="relative backdrop-blur-2xl bg-white/20 dark:bg-black/20 border border-white/30 dark:border-white/10 p-12 rounded-3xl shadow-2xl text-center">
+            <div className="relative mb-8">
+              <div className="absolute inset-0 bg-gradient-to-r from-violet-400 to-cyan-400 rounded-full blur-xl opacity-50"></div>
+              <div className="relative w-20 h-20 mx-auto">
+                <div className="absolute inset-0 border-4 border-violet-400/30 rounded-full"></div>
+                <div className="absolute inset-0 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+                <div className="absolute inset-2 bg-gradient-to-br from-violet-500 to-cyan-500 rounded-full flex items-center justify-center text-2xl">
+                  🗺️
+                </div>
+              </div>
+            </div>
+            <h2 className="text-3xl font-black mb-4 bg-gradient-to-r from-violet-600 via-cyan-600 to-emerald-600 bg-clip-text text-transparent">
+              Loading Community
+            </h2>
+            <p className="text-xl text-gray-700 dark:text-gray-300">Discovering amazing people near you...</p>
+          </div>
         </div>
       </div>
     )
@@ -231,224 +246,286 @@ export default function CommunityMap() {
   const zoom = userLocation ? 10 : 7
 
   return (
-    <div className="space-y-6">
-      {/* Header Section */}
-      <div className="text-center">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          🗺️ Community Map
-        </h2>
-        <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-          Discover and connect with Nepali community members across Indiana. Set your location to find nearby members.
-        </p>
-      </div>
-
-      {/* Controls Panel */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700 p-6 rounded-2xl shadow-lg border border-blue-100 dark:border-slate-600">
-        <div className="space-y-4">
-          {/* Location Input Section */}
-          <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-            <div className="flex-shrink-0">
-              <button
-                onClick={handleGetLocation}
-                className="group bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 dark:from-blue-700 dark:to-blue-800 dark:hover:from-blue-600 dark:hover:to-blue-700 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center gap-2 w-full lg:w-auto"
-              >
-                <span className="text-lg">📍</span>
-                <span>Use My Location</span>
-                <div className="w-2 h-2 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              </button>
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-cyan-50 to-emerald-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900 p-4 space-y-8">
+      {/* Floating Header */}
+      <div className="text-center relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-violet-600/20 via-cyan-600/20 to-emerald-600/20 blur-3xl"></div>
+        <div className="relative backdrop-blur-xl bg-white/30 dark:bg-black/30 border border-white/20 dark:border-white/10 rounded-3xl p-8 shadow-2xl">
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-cyan-500 rounded-2xl flex items-center justify-center text-3xl shadow-lg">
+              🗺️
             </div>
-
-            <div className="flex items-center gap-3 flex-1">
-              <div className="hidden lg:block w-px h-8 bg-gray-300 dark:bg-gray-600"></div>
-              <span className="text-gray-500 dark:text-gray-400 font-medium">or</span>
-              <div className="flex gap-3 flex-1">
-                <div className="relative flex-1">
-                  <input
-                    type="text"
-                    placeholder="Enter city or ZIP code..."
-                    value={locationInput}
-                    onChange={(e) => setLocationInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleLocationSearch()}
-                    className="w-full border-2 border-gray-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 transition-all duration-200"
-                  />
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                    🔍
-                  </div>
-                </div>
-                <button
-                  onClick={handleLocationSearch}
-                  disabled={locationLoading}
-                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 dark:from-green-700 dark:to-emerald-700 dark:hover:from-green-600 dark:hover:to-emerald-600 text-white px-6 py-3 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center gap-2"
-                >
-                  {locationLoading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      <span>Searching...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>🎯</span>
-                      <span>Search</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
+            <h1 className="text-5xl font-black bg-gradient-to-r from-violet-600 via-cyan-600 to-emerald-600 bg-clip-text text-transparent">
+              Community Map
+            </h1>
           </div>
-
-          {/* Filter and Info Section */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-blue-200 dark:border-slate-600">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              {userLocation && (
-                <div className="flex items-center gap-3 bg-white dark:bg-slate-800 px-4 py-2 rounded-lg shadow-sm border border-gray-200 dark:border-slate-600">
-                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">📏 Radius:</label>
-                  <select
-                    value={searchRadius}
-                    onChange={(e) => {
-                      const newRadius = Number(e.target.value)
-                      setSearchRadius(newRadius)
-                    }}
-                    className="border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-1 text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 transition-all duration-200"
-                  >
-                    <option value={10}>10 miles</option>
-                    <option value={25}>25 miles</option>
-                    <option value={50}>50 miles</option>
-                    <option value={100}>100 miles</option>
-                  </select>
-                </div>
-              )}
-
-              <div className="flex items-center gap-2 bg-white dark:bg-slate-800 px-4 py-2 rounded-lg shadow-sm border border-gray-200 dark:border-slate-600">
-                <span className="text-lg">👥</span>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {userLocation
-                    ? `${filteredProfiles.length} members within ${searchRadius} miles`
-                    : `${filteredProfiles.length} total members with locations`
-                  }
-                </span>
-              </div>
-            </div>
-
-            {userLocation && (
-              <button
-                onClick={() => setUserLocation(null)}
-                className="text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium hover:underline transition-colors duration-200 flex items-center gap-1"
-              >
-                <span>❌</span>
-                <span>Clear Location</span>
-              </button>
-            )}
-          </div>
+          <p className="text-lg text-gray-700 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
+            Discover and connect with <span className="font-semibold text-violet-600 dark:text-violet-400">Nepali community members</span> across Indiana.
+            Set your location to find nearby members and build meaningful connections.
+          </p>
         </div>
       </div>
 
-      {/* Map Container */}
-      <div className="h-[500px] sm:h-[600px] md:h-[700px] w-full rounded-2xl overflow-hidden shadow-2xl border-4 border-white dark:border-slate-700 relative bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-800 dark:to-slate-900">
-        {typeof window !== 'undefined' && (
-          <MapContainer
-            center={center}
-            zoom={zoom}
-            style={{ height: '100%', width: '100%' }}
-            scrollWheelZoom={true}
-            dragging={true}
-            touchZoom={true}
-            doubleClickZoom={true}
-            boxZoom={true}
-            keyboard={true}
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-
-            {/* User location marker */}
-            {userLocation && icons && (
-              <Marker position={[userLocation.lat, userLocation.lng]} icon={icons.userIcon}>
-                <Popup>
-                  <div className="text-center p-2">
-                    <div className="text-2xl mb-2">🎯</div>
-                    <h3 className="font-bold text-lg text-blue-600">Your Location</h3>
-                    <p className="text-sm text-gray-600 mt-1">You are here!</p>
-                  </div>
-                </Popup>
-              </Marker>
-            )}
-
-            {/* Community member markers */}
-            {icons && markersToRender.map((profile) => (
-              <Marker
-                key={`${profile.id}-${profile.position[0]}-${profile.position[1]}`}
-                position={profile.position}
-                icon={icons.communityIcon}
-              >
-                <Popup>
-                  <div className="p-4 max-w-sm">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                        {profile.full_name.charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-xl text-gray-800 mb-1">{profile.full_name}</h3>
-                        <div className="flex items-center gap-1 text-sm text-gray-600">
-                          <span className="text-red-500">📍</span>
-                          <span>{profile.city_or_zip}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 mb-3">
-                      <div className="flex items-center gap-2 text-sm bg-gray-50 p-2 rounded-lg">
-                        <span className="text-green-600">📞</span>
-                        <span className="font-medium">{formatContact(profile)}</span>
-                      </div>
-                    </div>
-
-                    {profile.about_me && (
-                      <div className="border-t pt-3">
-                        <div className="flex items-start gap-2">
-                          <span className="text-blue-500 text-sm">💬</span>
-                          <div>
-                            <p className="text-sm font-semibold text-gray-700 mb-1">About:</p>
-                            <p className="text-sm text-gray-600 leading-relaxed">{profile.about_me}</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
-          </MapContainer>
-        )}
-
-        {!userLocation && (
-          <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-blue-900/40 to-indigo-900/60 backdrop-blur-sm flex items-center justify-center z-10 p-4">
-            <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-2xl text-center max-w-md w-full border-2 border-blue-100 dark:border-slate-600 transform hover:scale-105 transition-transform duration-300">
-              <div className="text-6xl mb-4 animate-bounce">🗺️</div>
-              <h3 className="text-2xl font-bold mb-3 text-gray-900 dark:text-gray-100 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                Discover Your Community
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-                Set your location to find and connect with Nepali community members near you in Indiana.
-              </p>
-              <div className="space-y-4">
+      {/* Glassmorphism Controls Panel */}
+      <div className="relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-violet-500/30 via-cyan-500/30 to-emerald-500/30 blur-2xl"></div>
+        <div className="relative backdrop-blur-2xl bg-white/20 dark:bg-black/20 border border-white/30 dark:border-white/10 rounded-3xl p-8 shadow-2xl">
+          <div className="space-y-6">
+            {/* Location Input Section */}
+            <div className="flex flex-col xl:flex-row xl:items-center gap-6">
+              <div className="flex-shrink-0">
                 <button
                   onClick={handleGetLocation}
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-4 rounded-2xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center gap-3"
+                  className="group relative overflow-hidden bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:via-purple-500 hover:to-indigo-500 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-violet-500/25 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 flex items-center gap-3 w-full xl:w-auto"
                 >
-                  <span className="text-xl">📍</span>
-                  <span>Use My Current Location</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative flex items-center gap-3">
+                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                      <span className="text-xl">📍</span>
+                    </div>
+                    <span>Use My Location</span>
+                    <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                  </div>
                 </button>
-                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                  <div className="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
-                  <span>or use the search above</span>
-                  <div className="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+              </div>
+
+              <div className="flex items-center gap-4 flex-1">
+                <div className="hidden xl:block w-px h-12 bg-gradient-to-b from-transparent via-white/30 to-transparent"></div>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    OR
+                  </div>
+                </div>
+                <div className="flex gap-4 flex-1">
+                  <div className="relative flex-1 group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 rounded-2xl blur-xl group-focus-within:blur-2xl transition-all duration-300"></div>
+                    <input
+                      type="text"
+                      placeholder="Enter city or ZIP code..."
+                      value={locationInput}
+                      onChange={(e) => setLocationInput(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleLocationSearch()}
+                      className="relative w-full backdrop-blur-xl bg-white/30 dark:bg-black/30 border border-white/30 dark:border-white/10 rounded-2xl px-6 py-4 text-lg font-medium text-gray-900 dark:text-white placeholder-gray-600 dark:placeholder-gray-400 focus:border-cyan-400/50 focus:ring-4 focus:ring-cyan-400/20 focus:outline-none transition-all duration-300 shadow-xl"
+                    />
+                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-2xl opacity-60">
+                      🔍
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleLocationSearch}
+                    disabled={locationLoading}
+                    className="group relative overflow-hidden bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-500 hover:from-emerald-400 hover:via-cyan-400 hover:to-blue-400 text-white px-8 py-4 rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed font-bold shadow-2xl hover:shadow-emerald-500/25 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 flex items-center gap-3"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="relative flex items-center gap-2">
+                      {locationLoading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
+                          <span>Searching...</span>
+                        </>
+                      ) : (
+                        <>
+                          <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
+                            <span className="text-sm">🎯</span>
+                          </div>
+                          <span>Search</span>
+                        </>
+                      )}
+                    </div>
+                  </button>
                 </div>
               </div>
             </div>
+
+            {/* Stats and Controls */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pt-6 border-t border-white/20 dark:border-white/10">
+              <div className="flex flex-wrap items-center gap-4">
+                {userLocation && (
+                  <div className="group relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-orange-500/30 to-red-500/30 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+                    <div className="relative backdrop-blur-xl bg-white/30 dark:bg-black/30 border border-white/30 dark:border-white/10 px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center text-white font-bold">
+                        📏
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <label className="font-bold text-gray-800 dark:text-white">Radius:</label>
+                        <select
+                          value={searchRadius}
+                          onChange={(e) => {
+                            const newRadius = Number(e.target.value)
+                            setSearchRadius(newRadius)
+                          }}
+                          className="backdrop-blur-xl bg-white/40 dark:bg-black/40 border border-white/30 dark:border-white/10 rounded-xl px-4 py-2 font-semibold text-gray-900 dark:text-white focus:border-orange-400/50 focus:ring-4 focus:ring-orange-400/20 focus:outline-none transition-all duration-300 shadow-lg"
+                        >
+                          <option value={10}>10 miles</option>
+                          <option value={25}>25 miles</option>
+                          <option value={50}>50 miles</option>
+                          <option value={100}>100 miles</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="group relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/30 to-cyan-500/30 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+                  <div className="relative backdrop-blur-xl bg-white/30 dark:bg-black/30 border border-white/30 dark:border-white/10 px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-cyan-500 rounded-xl flex items-center justify-center text-white font-bold text-lg">
+                      👥
+                    </div>
+                    <div className="font-bold text-gray-800 dark:text-white">
+                      <span className="text-2xl bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">
+                        {filteredProfiles.length}
+                      </span>
+                      <span className="ml-2">
+                        {userLocation
+                          ? `members within ${searchRadius} miles`
+                          : 'total members with locations'
+                        }
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {userLocation && (
+                <button
+                  onClick={() => setUserLocation(null)}
+                  className="group relative overflow-hidden bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-400 hover:to-pink-400 text-white px-6 py-3 rounded-2xl font-bold shadow-2xl hover:shadow-red-500/25 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 flex items-center gap-3"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative flex items-center gap-2">
+                    <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
+                      <span className="text-sm">❌</span>
+                    </div>
+                    <span>Clear Location</span>
+                  </div>
+                </button>
+              )}
+            </div>
           </div>
-        )}
-      </div>
-    </div>
-  )
+        </div>
+
+        {/* Futuristic Map Container */}
+        <div className="relative group">
+          <div className="absolute inset-0 bg-gradient-to-r from-violet-500/40 via-cyan-500/40 to-emerald-500/40 rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-500"></div>
+          <div className="relative h-[600px] sm:h-[700px] md:h-[800px] w-full rounded-3xl overflow-hidden shadow-2xl backdrop-blur-xl bg-white/10 dark:bg-black/10 border-2 border-white/20 dark:border-white/10">
+            {typeof window !== 'undefined' && (
+              <MapContainer
+                center={center}
+                zoom={zoom}
+                style={{ height: '100%', width: '100%' }}
+                scrollWheelZoom={true}
+                dragging={true}
+                touchZoom={true}
+                doubleClickZoom={true}
+                boxZoom={true}
+                keyboard={true}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+
+                {/* User location marker */}
+                {userLocation && icons && (
+                  <Marker position={[userLocation.lat, userLocation.lng]} icon={icons.userIcon}>
+                    <Popup>
+                      <div className="text-center p-2">
+                        <div className="text-2xl mb-2">🎯</div>
+                        <h3 className="font-bold text-lg text-blue-600">Your Location</h3>
+                        <p className="text-sm text-gray-600 mt-1">You are here!</p>
+                      </div>
+                    </Popup>
+                  </Marker>
+                )}
+
+                {/* Community member markers */}
+                {icons && markersToRender.map((profile) => (
+                  <Marker
+                    key={`${profile.id}-${profile.position[0]}-${profile.position[1]}`}
+                    position={profile.position}
+                    icon={icons.communityIcon}
+                  >
+                    <Popup>
+                      <div className="p-4 max-w-sm">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                            {profile.full_name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-xl text-gray-800 mb-1">{profile.full_name}</h3>
+                            <div className="flex items-center gap-1 text-sm text-gray-600">
+                              <span className="text-red-500">📍</span>
+                              <span>{profile.city_or_zip}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 mb-3">
+                          <div className="flex items-center gap-2 text-sm bg-gray-50 p-2 rounded-lg">
+                            <span className="text-green-600">📞</span>
+                            <span className="font-medium">{formatContact(profile)}</span>
+                          </div>
+                        </div>
+
+                        {profile.about_me && (
+                          <div className="border-t pt-3">
+                            <div className="flex items-start gap-2">
+                              <span className="text-blue-500 text-sm">💬</span>
+                              <div>
+                                <p className="text-sm font-semibold text-gray-700 mb-1">About:</p>
+                                <p className="text-sm text-gray-600 leading-relaxed">{profile.about_me}</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))}
+              </MapContainer>
+            )}
+
+            {!userLocation && (
+              <div className="absolute inset-0 bg-gradient-to-br from-violet-900/80 via-purple-900/60 to-indigo-900/80 backdrop-blur-2xl flex items-center justify-center z-10 p-6">
+                <div className="relative group max-w-lg w-full">
+                  <div className="absolute inset-0 bg-gradient-to-r from-violet-500/50 via-cyan-500/50 to-emerald-500/50 rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-500"></div>
+                  <div className="relative backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/20 dark:border-white/10 p-10 rounded-3xl shadow-2xl text-center transform hover:scale-105 transition-all duration-500">
+                    <div className="relative mb-8">
+                      <div className="absolute inset-0 bg-gradient-to-r from-violet-400 to-cyan-400 rounded-full blur-2xl opacity-50 animate-pulse"></div>
+                      <div className="relative text-8xl animate-bounce">🗺️</div>
+                    </div>
+                    <h3 className="text-4xl font-black mb-4 bg-gradient-to-r from-violet-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
+                      Discover Your Community
+                    </h3>
+                    <p className="text-xl text-white/80 mb-8 leading-relaxed">
+                      Set your location to find and connect with <span className="font-bold text-cyan-300">Nepali community members</span> near you in Indiana.
+                    </p>
+                    <div className="space-y-6">
+                      <button
+                        onClick={handleGetLocation}
+                        className="group relative overflow-hidden w-full bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:via-purple-500 hover:to-indigo-500 text-white px-8 py-5 rounded-2xl font-bold text-xl shadow-2xl hover:shadow-violet-500/50 transform hover:scale-105 hover:-translate-y-2 transition-all duration-300 flex items-center justify-center gap-4"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="relative flex items-center gap-4">
+                          <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
+                            <span className="text-2xl">📍</span>
+                          </div>
+                          <span>Use My Current Location</span>
+                        </div>
+                      </button>
+                      <div className="flex items-center gap-4 text-white/60">
+                        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
+                        <span className="font-medium">or use the search above</span>
+                        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        )
 }
