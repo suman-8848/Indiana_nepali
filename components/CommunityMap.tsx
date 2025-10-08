@@ -553,16 +553,7 @@ export default function CommunityMap() {
               zoomControl={true}
               attributionControl={false}
               preferCanvas={true}
-              whenReady={(map) => {
-                // Additional mobile optimizations
-                const mapInstance = map.target;
-                mapInstance.getContainer().style.touchAction = 'manipulation';
 
-                // Disable double-tap zoom delay on mobile
-                if (mapInstance.tap) {
-                  mapInstance.tap.enable();
-                }
-              }}
             >
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
