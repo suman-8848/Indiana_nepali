@@ -64,3 +64,42 @@ body {
         color: rgb(148, 163, 184) !important;
     }
 }
+
+/* Marker Clustering Styles */
+.custom-cluster-icon {
+    background: transparent !important;
+    border: none !important;
+}
+
+.cluster-marker {
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.cluster-small {
+    background-color: #51cf66;
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+}
+
+.cluster-medium {
+    background-color: #ffd43b;
+    width: 35px;
+    height: 35px;
+    font-size: 14px;
+    color: #333;
+}
+
+.cluster-large {
+    background-color: #ff6b6b;
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+}

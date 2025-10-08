@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { supabase, Profile } from '../lib/supabase'
 import { geocodeLocation } from '../lib/geocoding'
@@ -10,66 +10,26 @@ const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapCo
 const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false })
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false })
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false })
+const MarkerClusterGroup = dynamic(() => import('react-leaflet-cluster'), { ssr: false })
 
-// Map controller component to handle bounds fitting
-const MapController = dynamic(() => Promise.resolve(({ userLocation, filteredProfiles }: { 
-  userLocation: {lat: number, lng: number} | null, 
-  filteredProfiles: Profile[] 
+// Simple map bounds controller
+const MapBoundsController = ({ userLocation, filteredProfiles, searchRadius }: {
+  userLocation: {lat: number, lng: number} | null,
+  filteredProfiles: Profile[],
+  searchRadius: number
 }) => {
-  const [mapInstance, setMapInstance] = useState<any>(null)
-
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const { useMap } = require('react-leaflet')
-      try {
-        const map = useMap()
-        setMapInstance(map)
-      } catch (error) {
-        console.log('Map not ready yet')
-      }
+    if (typeof window !== 'undefined' && userLocation) {
+      // Simple approach: trigger a custom event that the map can listen to
+      const event = new CustomEvent('fitMapBounds', {
+        detail: { userLocation, filteredProfiles, searchRadius }
+      })
+      window.dispatchEvent(event)
     }
-  }, [])
-
-  useEffect(() => {
-    if (!mapInstance || !userLocation) return
-
-    const timeoutId = setTimeout(() => {
-      if (typeof window !== 'undefined') {
-        const L = require('leaflet')
-        
-        if (filteredProfiles.length === 0) {
-          // If no members found, just center on user location
-          mapInstance.setView([userLocation.lat, userLocation.lng], 11)
-          return
-        }
-        
-        // Create bounds that include user location and all filtered profiles
-        const bounds = L.latLngBounds([
-          [userLocation.lat, userLocation.lng]
-        ])
-        
-        // Add all filtered profile locations to bounds
-        filteredProfiles.forEach(profile => {
-          bounds.extend([profile.latitude, profile.longitude])
-        })
-        
-        // Fit the map to these bounds with padding
-        if (bounds.isValid()) {
-          mapInstance.fitBounds(bounds, {
-            padding: [30, 30],
-            maxZoom: 13
-          })
-        } else {
-          mapInstance.setView([userLocation.lat, userLocation.lng], 11)
-        }
-      }
-    }, 300)
-
-    return () => clearTimeout(timeoutId)
-  }, [mapInstance, userLocation, filteredProfiles])
+  }, [userLocation, filteredProfiles, searchRadius])
 
   return null
-}), { ssr: false })
+}
 
 // Custom hook to create Leaflet icons
 const useLeafletIcons = () => {
@@ -124,7 +84,41 @@ export default function CommunityMap() {
   const [loading, setLoading] = useState(true)
   const [locationInput, setLocationInput] = useState('')
   const [locationLoading, setLocationLoading] = useState(false)
+  const [mapInstance, setMapInstance] = useState<any>(null)
   const icons = useLeafletIcons()
+
+  // Listen for bounds fitting events
+  useEffect(() => {
+    const handleFitBounds = (event: any) => {
+      if (!mapInstance) return
+      
+      const { userLocation, filteredProfiles } = event.detail
+      
+      if (typeof window !== 'undefined') {
+        const L = require('leaflet')
+        
+        if (filteredProfiles.length === 0) {
+          mapInstance.setView([userLocation.lat, userLocation.lng], 11)
+          return
+        }
+        
+        const bounds = L.latLngBounds([[userLocation.lat, userLocation.lng]])
+        filteredProfiles.forEach((profile: Profile) => {
+          bounds.extend([profile.latitude, profile.longitude])
+        })
+        
+        if (bounds.isValid()) {
+          mapInstance.fitBounds(bounds, {
+            padding: [30, 30],
+            maxZoom: 13
+          })
+        }
+      }
+    }
+
+    window.addEventListener('fitMapBounds', handleFitBounds)
+    return () => window.removeEventListener('fitMapBounds', handleFitBounds)
+  }, [mapInstance])
 
   const fetchProfiles = useCallback(async () => {
     // Check if Supabase is properly configured
@@ -326,8 +320,14 @@ export default function CommunityMap() {
             zoom={zoom}
             style={{ height: '100%', width: '100%' }}
             className="z-0"
+            whenReady={(map) => setMapInstance(map.target)}
           >
-            <MapController userLocation={userLocation} filteredProfiles={filteredProfiles} />
+            <MapBoundsController 
+              userLocation={userLocation} 
+              filteredProfiles={filteredProfiles}
+              searchRadius={searchRadius}
+            />
+            
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -343,26 +343,43 @@ export default function CommunityMap() {
               </Marker>
             )}
 
-            {filteredProfiles.map((profile) => (
-              <Marker
-                key={profile.id}
-                position={[profile.latitude, profile.longitude]}
-                icon={icons?.communityIcon}
-              >
-                <Popup>
-                  <div className="p-2 max-w-xs">
-                    <h3 className="font-semibold text-lg mb-2">{profile.full_name}</h3>
-                    <p className="text-sm text-gray-600 mb-2">📍 {profile.city_or_zip}</p>
-                    <p className="text-sm mb-2">📞 {formatContact(profile)}</p>
-                    {profile.about_me && (
-                      <p className="text-sm text-gray-700 mt-2">
-                        <strong>About:</strong> {profile.about_me}
-                      </p>
-                    )}
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
+            <MarkerClusterGroup
+              chunkedLoading
+              iconCreateFunction={(cluster: any) => {
+                const count = cluster.getChildCount()
+                let size = 'small'
+                if (count >= 10) size = 'large'
+                else if (count >= 5) size = 'medium'
+                
+                return typeof window !== 'undefined' ? 
+                  require('leaflet').divIcon({
+                    html: `<div class="cluster-marker cluster-${size}"><span>${count}</span></div>`,
+                    className: 'custom-cluster-icon',
+                    iconSize: [40, 40]
+                  }) : null
+              }}
+            >
+              {filteredProfiles.map((profile) => (
+                <Marker
+                  key={profile.id}
+                  position={[profile.latitude, profile.longitude]}
+                  icon={icons?.communityIcon}
+                >
+                  <Popup>
+                    <div className="p-2 max-w-xs">
+                      <h3 className="font-semibold text-lg mb-2">{profile.full_name}</h3>
+                      <p className="text-sm text-gray-600 mb-2">📍 {profile.city_or_zip}</p>
+                      <p className="text-sm mb-2">📞 {formatContact(profile)}</p>
+                      {profile.about_me && (
+                        <p className="text-sm text-gray-700 mt-2">
+                          <strong>About:</strong> {profile.about_me}
+                        </p>
+                      )}
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+            </MarkerClusterGroup>
           </MapContainer>
         )}
         
