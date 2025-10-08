@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120">
+  <!-- Blue outer border -->
+  <path d="M0 0 L60 0 L100 60 L60 60 L0 120 L0 0 Z" fill="#003893" stroke="#003893" stroke-width="2"/>
+  
+  <!-- Red upper triangle -->
+  <path d="M6 6 L54 6 L6 54 Z" fill="#DC143C"/>
+  
+  <!-- Red lower triangle -->
+  <path d="M6 66 L54 66 L6 114 Z" fill="#DC143C"/>
+  
+  <!-- White sun in upper triangle -->
+  <g transform="translate(30, 30)">
+    <!-- Sun rays - 12 pointed rays -->
+    <g fill="white">
+      <path d="M0,-12 L2,-8 L-2,-8 Z"/>
+      <path d="M0,-12 L2,-8 L-2,-8 Z" transform="rotate(30)"/>
+      <path d="M0,-12 L2,-8 L-2,-8 Z" transform="rotate(60)"/>
+      <path d="M0,-12 L2,-8 L-2,-8 Z" transform="rotate(90)"/>
+      <path d="M0,-12 L2,-8 L-2,-8 Z" transform="rotate(120)"/>
+      <path d="M0,-12 L2,-8 L-2,-8 Z" transform="rotate(150)"/>
+      <path d="M0,-12 L2,-8 L-2,-8 Z" transform="rotate(180)"/>
+      <path d="M0,-12 L2,-8 L-2,-8 Z" transform="rotate(210)"/>
+      <path d="M0,-12 L2,-8 L-2,-8 Z" transform="rotate(240)"/>
+      <path d="M0,-12 L2,-8 L-2,-8 Z" transform="rotate(270)"/>
+      <path d="M0,-12 L2,-8 L-2,-8 Z" transform="rotate(300)"/>
+      <path d="M0,-12 L2,-8 L-2,-8 Z" transform="rotate(330)"/>
+    </g>
+    <!-- Sun center circle -->
+    <circle cx="0" cy="0" r="6" fill="white"/>
+  </g>
+  
+  <!-- White moon in lower triangle -->
+  <g transform="translate(30, 90)">
+    <!-- Moon rays - 12 pointed rays -->
+    <g fill="white">
+      <path d="M0,-10 L1.5,-7 L-1.5,-7 Z"/>
+      <path d="M0,-10 L1.5,-7 L-1.5,-7 Z" transform="rotate(30)"/>
+      <path d="M0,-10 L1.5,-7 L-1.5,-7 Z" transform="rotate(60)"/>
+      <path d="M0,-10 L1.5,-7 L-1.5,-7 Z" transform="rotate(90)"/>
+      <path d="M0,-10 L1.5,-7 L-1.5,-7 Z" transform="rotate(120)"/>
+      <path d="M0,-10 L1.5,-7 L-1.5,-7 Z" transform="rotate(150)"/>
+      <path d="M0,-10 L1.5,-7 L-1.5,-7 Z" transform="rotate(180)"/>
+      <path d="M0,-10 L1.5,-7 L-1.5,-7 Z" transform="rotate(210)"/>
+      <path d="M0,-10 L1.5,-7 L-1.5,-7 Z" transform="rotate(240)"/>
+      <path d="M0,-10 L1.5,-7 L-1.5,-7 Z" transform="rotate(270)"/>
+      <path d="M0,-10 L1.5,-7 L-1.5,-7 Z" transform="rotate(300)"/>
+      <path d="M0,-10 L1.5,-7 L-1.5,-7 Z" transform="rotate(330)"/>
+    </g>
+    <!-- Moon crescent -->
+    <path d="M-4,0 A4,4 0 1,1 4,0 A2.5,2.5 0 1,0 -4,0 Z" fill="white"/>
+  </g>
+</svg>

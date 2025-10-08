@@ -11,61 +11,13 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16 sm:h-20">
           {/* Logo Section */}
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform duration-300 border border-gray-200/50 dark:border-gray-700/50">
-              <svg width="30" height="24" viewBox="0 0 30 24" className="w-7 h-6 sm:w-8 sm:h-7">
-                {/* Nepal Flag - Exact Recreation */}
-                <defs>
-                  <clipPath id="nepal-flag-clip">
-                    <path d="M2 2 L15 2 L28 12 L15 12 L2 22 L2 2 Z"/>
-                  </clipPath>
-                </defs>
-                
-                {/* Blue outer border */}
-                <path d="M0 0 L15 0 L30 12 L15 12 L0 24 L0 0 Z" fill="#003893"/>
-                
-                {/* Red inner triangles */}
-                <path d="M2 2 L13 2 L2 10 Z" fill="#DC143C"/>
-                <path d="M2 14 L13 14 L2 22 Z" fill="#DC143C"/>
-                
-                {/* White sun in upper triangle */}
-                <g transform="translate(7.5, 6)">
-                  {/* Sun rays - 12 pointed star */}
-                  <g fill="white">
-                    <polygon points="0,-2.5 0.3,-1.8 -0.3,-1.8"/>
-                    <polygon points="1.25,-2.17 1.8,-1.25 1.06,-1.56"/>
-                    <polygon points="2.17,-1.25 2.5,0 1.8,-0.3"/>
-                    <polygon points="2.17,1.25 1.8,0.3 2.5,0"/>
-                    <polygon points="1.25,2.17 1.06,1.56 1.8,1.25"/>
-                    <polygon points="0,2.5 -0.3,1.8 0.3,1.8"/>
-                    <polygon points="-1.25,2.17 -1.06,1.56 -1.8,1.25"/>
-                    <polygon points="-2.17,1.25 -1.8,0.3 -2.5,0"/>
-                    <polygon points="-2.17,-1.25 -2.5,0 -1.8,-0.3"/>
-                    <polygon points="-1.25,-2.17 -1.8,-1.25 -1.06,-1.56"/>
-                  </g>
-                  {/* Sun center circle */}
-                  <circle cx="0" cy="0" r="1.2" fill="white"/>
-                </g>
-                
-                {/* White moon in lower triangle */}
-                <g transform="translate(7.5, 18)">
-                  {/* Moon rays - 8 pointed star */}
-                  <g fill="white">
-                    <polygon points="0,-2 0.2,-1.5 -0.2,-1.5"/>
-                    <polygon points="1.4,-1.4 1.5,-1 1,-1.2"/>
-                    <polygon points="2,0 1.5,0.2 1.5,-0.2"/>
-                    <polygon points="1.4,1.4 1,1.2 1.5,1"/>
-                    <polygon points="0,2 -0.2,1.5 0.2,1.5"/>
-                    <polygon points="-1.4,1.4 -1,1.2 -1.5,1"/>
-                    <polygon points="-2,0 -1.5,-0.2 -1.5,0.2"/>
-                    <polygon points="-1.4,-1.4 -1.5,-1 -1,-1.2"/>
-                  </g>
-                  {/* Moon crescent */}
-                  <path d="M-1,0 A1,1 0 1,1 1,0 A0.6,0.6 0 1,0 -1,0 Z" fill="white"/>
-                </g>
-                
-                {/* Blue border outline */}
-                <path d="M0 0 L15 0 L30 12 L15 12 L0 24 L0 0 Z" fill="none" stroke="#003893" strokeWidth="0.5"/>
-              </svg>
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform duration-300 border border-gray-200/50 dark:border-gray-700/50 p-1">
+              <img 
+                src="/nepal-flag.svg" 
+                alt="Nepal Flag" 
+                className="w-full h-full object-contain rounded-lg"
+              />
+
             </div>
             <div className="hidden sm:block">
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
