@@ -12,24 +12,67 @@ const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { 
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false })
 const Circle = dynamic(() => import('react-leaflet').then(mod => mod.Circle), { ssr: false })
 
-// Simple map bounds controller
-const MapBoundsController = ({ userLocation, filteredProfiles, searchRadius }: {
+// Simple map bounds controller using useMap hook
+const MapBoundsController = dynamic(() => Promise.resolve(({ userLocation, filteredProfiles }: {
   userLocation: {lat: number, lng: number} | null,
-  filteredProfiles: Profile[],
-  searchRadius: number
+  filteredProfiles: Profile[]
 }) => {
+  const [map, setMap] = useState<any>(null)
+
   useEffect(() => {
-    if (typeof window !== 'undefined' && userLocation) {
-      // Simple approach: trigger a custom event that the map can listen to
-      const event = new CustomEvent('fitMapBounds', {
-        detail: { userLocation, filteredProfiles, searchRadius }
-      })
-      window.dispatchEvent(event)
+    if (typeof window !== 'undefined') {
+      try {
+        const { useMap } = require('react-leaflet')
+        const mapInstance = useMap()
+        setMap(mapInstance)
+        console.log('Map instance set:', !!mapInstance)
+      } catch (error) {
+        console.log('Map not ready yet:', error)
+      }
     }
-  }, [userLocation, filteredProfiles, searchRadius])
+  }, [])
+
+  useEffect(() => {
+    if (!map || !userLocation) {
+      console.log('Skipping bounds fit - map:', !!map, 'userLocation:', !!userLocation)
+      return
+    }
+
+    console.log('Fitting bounds for', filteredProfiles.length, 'profiles')
+
+    const timeoutId = setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        const L = require('leaflet')
+        
+        if (filteredProfiles.length === 0) {
+          console.log('No profiles, centering on user location')
+          map.setView([userLocation.lat, userLocation.lng], 11)
+          return
+        }
+        
+        const bounds = L.latLngBounds([[userLocation.lat, userLocation.lng]])
+        filteredProfiles.forEach((profile: Profile) => {
+          bounds.extend([profile.latitude, profile.longitude])
+        })
+        
+        if (bounds.isValid()) {
+          console.log('Fitting bounds:', bounds.toBBoxString())
+          map.fitBounds(bounds, {
+            padding: [30, 30],
+            maxZoom: 13
+          })
+        } else {
+          console.log('Invalid bounds, centering on user location')
+          map.setView([userLocation.lat, userLocation.lng], 11)
+        }
+      }
+    }, 500) // Increased delay to ensure map is ready
+
+    return () => clearTimeout(timeoutId)
+  }, [map, userLocation, filteredProfiles])
 
   return null
-}
+}), { ssr: false })
 
 // Custom hook to create Leaflet icons
 const useLeafletIcons = () => {
@@ -84,42 +127,7 @@ export default function CommunityMap() {
   const [loading, setLoading] = useState(true)
   const [locationInput, setLocationInput] = useState('')
   const [locationLoading, setLocationLoading] = useState(false)
-  const [mapInstance, setMapInstance] = useState<any>(null)
-  const mapRef = useRef<any>(null)
   const icons = useLeafletIcons()
-
-  // Listen for bounds fitting events
-  useEffect(() => {
-    const handleFitBounds = (event: any) => {
-      if (!mapInstance) return
-      
-      const { userLocation, filteredProfiles } = event.detail
-      
-      if (typeof window !== 'undefined') {
-        const L = require('leaflet')
-        
-        if (filteredProfiles.length === 0) {
-          mapInstance.setView([userLocation.lat, userLocation.lng], 11)
-          return
-        }
-        
-        const bounds = L.latLngBounds([[userLocation.lat, userLocation.lng]])
-        filteredProfiles.forEach((profile: Profile) => {
-          bounds.extend([profile.latitude, profile.longitude])
-        })
-        
-        if (bounds.isValid()) {
-          mapInstance.fitBounds(bounds, {
-            padding: [30, 30],
-            maxZoom: 13
-          })
-        }
-      }
-    }
-
-    window.addEventListener('fitMapBounds', handleFitBounds)
-    return () => window.removeEventListener('fitMapBounds', handleFitBounds)
-  }, [mapInstance])
 
   const fetchProfiles = useCallback(async () => {
     // Check if Supabase is properly configured
@@ -138,6 +146,7 @@ export default function CommunityMap() {
       if (error) {
         console.error('Error fetching profiles:', error)
       } else {
+        console.log('Fetched profiles:', data?.length || 0, data)
         setProfiles(data || [])
       }
     } catch (error) {
@@ -164,10 +173,14 @@ export default function CommunityMap() {
   }
 
   const filteredProfiles = userLocation 
-    ? profiles.filter(profile => 
-        calculateDistance(userLocation.lat, userLocation.lng, profile.latitude, profile.longitude) <= searchRadius
-      )
+    ? profiles.filter(profile => {
+        const distance = calculateDistance(userLocation.lat, userLocation.lng, profile.latitude, profile.longitude)
+        console.log(`Profile ${profile.full_name}: distance = ${distance.toFixed(2)} miles, within ${searchRadius}? ${distance <= searchRadius}`)
+        return distance <= searchRadius
+      })
     : [] // Show no markers when user location is not set
+
+  console.log('Total profiles:', profiles.length, 'Filtered profiles:', filteredProfiles.length, 'User location:', userLocation)
 
   // Group profiles by approximate area for privacy
   const groupProfilesByArea = (profiles: Profile[]) => {
@@ -339,17 +352,11 @@ export default function CommunityMap() {
             zoom={zoom}
             style={{ height: '100%', width: '100%' }}
             className="z-0"
-            ref={mapRef}
-            whenReady={() => {
-              if (mapRef.current) {
-                setMapInstance(mapRef.current)
-              }
-            }}
+
           >
             <MapBoundsController 
               userLocation={userLocation} 
               filteredProfiles={filteredProfiles}
-              searchRadius={searchRadius}
             />
             
             <TileLayer
