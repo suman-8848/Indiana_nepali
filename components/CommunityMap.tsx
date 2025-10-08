@@ -11,109 +11,17 @@ const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLaye
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false })
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false })
 
-
-// Map bounds controller - only runs once when location is first set
-const MapBoundsController = ({ filteredProfiles, userLocation, shouldFitBounds }: {
-  filteredProfiles: Profile[]
-  userLocation: { lat: number, lng: number } | null
-  shouldFitBounds: boolean
-}) => {
-  useEffect(() => {
-    if (!shouldFitBounds || filteredProfiles.length === 0) return
-
-    console.log('Fitting bounds for', filteredProfiles.length, 'profiles')
-
-    const timeoutId = setTimeout(() => {
-      if (typeof window !== 'undefined') {
-        const mapElement = document.querySelector('.leaflet-container')
-        console.log('Map element found:', !!mapElement)
-
-        if (mapElement && (mapElement as any)._leaflet_map) {
-          console.log('Leaflet map instance found')
-          const map = (mapElement as any)._leaflet_map
-          const L = require('leaflet')
-
-          const bounds = L.latLngBounds()
-
-          // Add user location to bounds if it exists
-          if (userLocation) {
-            bounds.extend([userLocation.lat, userLocation.lng])
-            console.log('Added user location to bounds')
-          }
-
-          // Add all profile locations to bounds
-          const validProfiles = filteredProfiles.filter(p => p.latitude && p.longitude)
-          validProfiles.forEach((profile: Profile) => {
-            bounds.extend([profile.latitude, profile.longitude])
-          })
-
-          console.log('Added', validProfiles.length, 'profile locations to bounds')
-
-          if (bounds.isValid()) {
-            console.log('Bounds are valid, fitting map')
-            map.fitBounds(bounds, {
-              padding: [30, 30],
-              maxZoom: 12
-            })
-          } else {
-            console.log('Bounds are not valid')
-          }
-        } else {
-          console.log('Map not found in DOM')
-        }
-      }
-    }, 1500) // Longer delay to ensure map is fully loaded
-
-    return () => clearTimeout(timeoutId)
-  }, [shouldFitBounds]) // Only depend on shouldFitBounds, not the profiles
-
-  return null
-}
-
-// Custom hook to create Leaflet icons
-const useLeafletIcons = () => {
-  const [icons, setIcons] = useState<any>(null)
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const L = require('leaflet')
-
-      // Fix for default markers
-      delete (L.Icon.Default.prototype as any)._getIconUrl
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-      })
-
-      // Custom icons
-      const userIcon = new L.Icon({
-        iconUrl: 'data:image/svg+xml;base64,' + btoa(`
-          <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12.5" cy="12.5" r="10" fill="#3B82F6" stroke="white" stroke-width="3"/>
-          </svg>
-        `),
-        iconSize: [25, 25],
-        iconAnchor: [12, 12],
-      })
-
-      const communityIcon = new L.Icon({
-        iconUrl: 'data:image/svg+xml;base64,' + btoa(`
-          <svg width="30" height="40" viewBox="0 0 30 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15 2C9.48 2 5 6.48 5 12c0 7.5 10 18 10 18s10-10.5 10-18c0-5.52-4.48-10-10-10z" fill="#DC2626"/>
-            <circle cx="15" cy="12" r="4" fill="white"/>
-          </svg>
-        `),
-        iconSize: [30, 40],
-        iconAnchor: [15, 40],
-        popupAnchor: [0, -40],
-      })
-
-      setIcons({ userIcon, communityIcon })
-    }
-  }, [])
-
-  return icons
+// Helper function to create offset positions for markers at same location
+const createOffsetPosition = (lat: number, lng: number, index: number, total: number): [number, number] => {
+  if (total === 1) return [lat, lng]
+  
+  // Create a small circle of positions around the original point
+  const radius = 0.001 // Very small offset in degrees
+  const angle = (2 * Math.PI * index) / total
+  const offsetLat = lat + radius * Math.cos(angle)
+  const offsetLng = lng + radius * Math.sin(angle)
+  
+  return [offsetLat, offsetLng]
 }
 
 export default function CommunityMap() {
@@ -123,8 +31,6 @@ export default function CommunityMap() {
   const [loading, setLoading] = useState(true)
   const [locationInput, setLocationInput] = useState('')
   const [locationLoading, setLocationLoading] = useState(false)
-  const [shouldFitBounds, setShouldFitBounds] = useState(false)
-  const icons = useLeafletIcons()
 
   const fetchProfiles = useCallback(async () => {
     // Check if Supabase is properly configured
@@ -143,7 +49,7 @@ export default function CommunityMap() {
       if (error) {
         console.error('Error fetching profiles:', error)
       } else {
-        console.log('Fetched profiles:', data?.length || 0, data)
+        console.log('Fetched profiles:', data?.length || 0)
         setProfiles(data || [])
       }
     } catch (error) {
@@ -171,23 +77,31 @@ export default function CommunityMap() {
 
   const filteredProfiles = userLocation
     ? profiles.filter(profile => {
-      const distance = calculateDistance(userLocation.lat, userLocation.lng, profile.latitude, profile.longitude)
-      return distance <= searchRadius
-    })
-    : profiles
+        if (!profile.latitude || !profile.longitude) return false
+        const distance = calculateDistance(userLocation.lat, userLocation.lng, profile.latitude, profile.longitude)
+        return distance <= searchRadius
+      })
+    : profiles.filter(profile => profile.latitude && profile.longitude)
 
-  // Debug logging
-  console.log('Debug - Total profiles:', profiles.length)
-  console.log('Debug - Filtered profiles:', filteredProfiles.length)
-  console.log('Debug - User location:', userLocation)
-  console.log('Debug - Icons loaded:', !!icons)
+  // Group profiles by location and create offset positions
+  const profilesWithPositions = filteredProfiles.reduce((acc, profile) => {
+    const key = `${profile.latitude},${profile.longitude}`
+    if (!acc[key]) {
+      acc[key] = []
+    }
+    acc[key].push(profile)
+    return acc
+  }, {} as Record<string, Profile[]>)
 
-  // More detailed profile debugging
-  filteredProfiles.forEach(profile => {
-    console.log(`Profile ${profile.full_name}: lat=${profile.latitude}, lng=${profile.longitude}, hasCoords=${!!(profile.latitude && profile.longitude)}`)
-  })
+  // Create markers with offset positions for same locations
+  const markersToRender = Object.values(profilesWithPositions).flatMap(profileGroup => 
+    profileGroup.map((profile, index) => ({
+      ...profile,
+      position: createOffsetPosition(profile.latitude, profile.longitude, index, profileGroup.length)
+    }))
+  )
 
-
+  console.log(`Rendering ${markersToRender.length} markers from ${filteredProfiles.length} profiles`)
 
   const handleGetLocation = () => {
     if (navigator.geolocation) {
@@ -198,7 +112,6 @@ export default function CommunityMap() {
             lng: position.coords.longitude
           }
           setUserLocation(newLocation)
-          setShouldFitBounds(true)
         },
         (error) => {
           console.error('Error getting location:', error)
@@ -225,7 +138,6 @@ export default function CommunityMap() {
           lng: coordinates.lng
         }
         setUserLocation(newLocation)
-        setShouldFitBounds(true)
       } else {
         alert('Could not find location. Please try a different address or city name.')
       }
@@ -257,7 +169,7 @@ export default function CommunityMap() {
   }
 
   const center: [number, number] = userLocation ? [userLocation.lat, userLocation.lng] : [39.7684, -86.1581]
-  const zoom = userLocation ? 11 : 7
+  const zoom = userLocation ? 10 : 7
 
   return (
     <div>
@@ -318,16 +230,13 @@ export default function CommunityMap() {
             <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 text-center sm:text-left">
               {userLocation
                 ? `Showing ${filteredProfiles.length} members within ${searchRadius} miles`
-                : `${profiles.length} total members - set your location to find nearby ones`
+                : `${filteredProfiles.length} total members with locations`
               }
             </div>
 
             {userLocation && (
               <button
-                onClick={() => {
-                  setUserLocation(null)
-                  setShouldFitBounds(false)
-                }}
+                onClick={() => setUserLocation(null)}
                 className="text-sm text-red-600 hover:text-red-800 underline text-center sm:text-left"
               >
                 Clear Location
@@ -343,22 +252,21 @@ export default function CommunityMap() {
             center={center}
             zoom={zoom}
             style={{ height: '100%', width: '100%' }}
-            className="z-0"
-
+            scrollWheelZoom={true}
+            dragging={true}
+            touchZoom={true}
+            doubleClickZoom={true}
+            boxZoom={true}
+            keyboard={true}
           >
-            <MapBoundsController
-              filteredProfiles={filteredProfiles}
-              userLocation={userLocation}
-              shouldFitBounds={shouldFitBounds}
-            />
-
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
-            {userLocation && icons && (
-              <Marker position={[userLocation.lat, userLocation.lng]} icon={icons.userIcon}>
+            {/* User location marker */}
+            {userLocation && (
+              <Marker position={[userLocation.lat, userLocation.lng]}>
                 <Popup>
                   <div className="text-center">
                     <strong>Your Location</strong>
@@ -367,36 +275,26 @@ export default function CommunityMap() {
               </Marker>
             )}
 
-            {/* Show all profiles as individual markers */}
-            {icons && filteredProfiles
-              .filter(profile => {
-                const hasCoords = !!(profile.latitude && profile.longitude)
-                console.log(`Rendering check for ${profile.full_name}: hasCoords=${hasCoords}, lat=${profile.latitude}, lng=${profile.longitude}`)
-                return hasCoords
-              })
-              .map((profile) => {
-                console.log(`Rendering marker for ${profile.full_name} at [${profile.latitude}, ${profile.longitude}]`)
-                return (
-                  <Marker
-                    key={profile.id}
-                    position={[profile.latitude, profile.longitude]}
-                    icon={icons.communityIcon}
-                  >
-                    <Popup>
-                      <div className="p-2 max-w-xs">
-                        <h3 className="font-semibold text-lg mb-2">{profile.full_name}</h3>
-                        <p className="text-sm text-gray-600 mb-2">📍 {profile.city_or_zip}</p>
-                        <p className="text-sm mb-2">📞 {formatContact(profile)}</p>
-                        {profile.about_me && (
-                          <p className="text-sm text-gray-700 mt-2">
-                            <strong>About:</strong> {profile.about_me}
-                          </p>
-                        )}
-                      </div>
-                    </Popup>
-                  </Marker>
-                )
-              })}
+            {/* Community member markers */}
+            {markersToRender.map((profile) => (
+              <Marker
+                key={`${profile.id}-${profile.position[0]}-${profile.position[1]}`}
+                position={profile.position}
+              >
+                <Popup>
+                  <div className="p-2 max-w-xs">
+                    <h3 className="font-semibold text-lg mb-2">{profile.full_name}</h3>
+                    <p className="text-sm text-gray-600 mb-2">📍 {profile.city_or_zip}</p>
+                    <p className="text-sm mb-2">📞 {formatContact(profile)}</p>
+                    {profile.about_me && (
+                      <p className="text-sm text-gray-700 mt-2">
+                        <strong>About:</strong> {profile.about_me}
+                      </p>
+                    )}
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
           </MapContainer>
         )}
 
