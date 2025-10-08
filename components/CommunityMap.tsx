@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import { supabase, Profile } from '../lib/supabase'
 import { geocodeLocation } from '../lib/geocoding'
@@ -85,6 +85,7 @@ export default function CommunityMap() {
   const [locationInput, setLocationInput] = useState('')
   const [locationLoading, setLocationLoading] = useState(false)
   const [mapInstance, setMapInstance] = useState<any>(null)
+  const mapRef = useRef<any>(null)
   const icons = useLeafletIcons()
 
   // Listen for bounds fitting events
@@ -338,7 +339,12 @@ export default function CommunityMap() {
             zoom={zoom}
             style={{ height: '100%', width: '100%' }}
             className="z-0"
-            whenReady={(map) => setMapInstance(map.target)}
+            ref={mapRef}
+            whenReady={() => {
+              if (mapRef.current) {
+                setMapInstance(mapRef.current)
+              }
+            }}
           >
             <MapBoundsController 
               userLocation={userLocation} 
