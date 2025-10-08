@@ -84,6 +84,27 @@ export default function CommunityMap() {
   const [locationLoading, setLocationLoading] = useState(false)
   const icons = useLeafletIcons()
 
+  // Mobile touch optimization
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Prevent default touch behaviors that might interfere with map
+      const preventDefaultTouch = (e: TouchEvent) => {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      };
+
+      // Add touch event listeners for better mobile handling
+      document.addEventListener('touchstart', preventDefaultTouch, { passive: false });
+      document.addEventListener('touchmove', preventDefaultTouch, { passive: false });
+
+      return () => {
+        document.removeEventListener('touchstart', preventDefaultTouch);
+        document.removeEventListener('touchmove', preventDefaultTouch);
+      };
+    }
+  }, []);
+
   const fetchProfiles = useCallback(async () => {
     // Check if Supabase is properly configured
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'https://placeholder.supabase.co') {
@@ -410,10 +431,22 @@ export default function CommunityMap() {
       {/* Futuristic Map Container */}
       <div className="relative group">
         <div className="absolute inset-0 bg-gradient-to-r from-violet-500/40 via-cyan-500/40 to-emerald-500/40 rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-500"></div>
-        <div className="relative h-[600px] sm:h-[700px] md:h-[800px] w-full rounded-3xl overflow-hidden shadow-2xl backdrop-blur-xl bg-white/10 dark:bg-black/10 border-2 border-white/20 dark:border-white/10">
+        <div
+          className="relative h-[600px] sm:h-[700px] md:h-[800px] w-full rounded-3xl overflow-hidden shadow-2xl backdrop-blur-xl bg-white/10 dark:bg-black/10 border-2 border-white/20 dark:border-white/10"
+          style={{ touchAction: 'manipulation' }}
+        >
           <style jsx global>{`
             .leaflet-container {
-              touch-action: pan-x pan-y;
+              touch-action: manipulation;
+              -webkit-touch-callout: none;
+              -webkit-user-select: none;
+              -khtml-user-select: none;
+              -moz-user-select: none;
+              -ms-user-select: none;
+              user-select: none;
+            }
+            .leaflet-container:focus {
+              outline: none;
             }
             .leaflet-control-zoom {
               border: none !important;
@@ -474,7 +507,22 @@ export default function CommunityMap() {
               background: white !important;
               box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
             }
+            .leaflet-touch .leaflet-control-layers,
+            .leaflet-touch .leaflet-bar {
+              border: none !important;
+            }
+            .leaflet-touch .leaflet-control-zoom-in,
+            .leaflet-touch .leaflet-control-zoom-out {
+              font-size: 22px !important;
+              line-height: 40px !important;
+            }
+            .leaflet-marker-icon {
+              touch-action: manipulation;
+            }
             @media (max-width: 768px) {
+              .leaflet-container {
+                touch-action: manipulation !important;
+              }
               .leaflet-control-zoom {
                 margin-right: 10px !important;
                 margin-top: 10px !important;
@@ -482,22 +530,39 @@ export default function CommunityMap() {
               .leaflet-popup-content-wrapper {
                 max-width: 280px !important;
               }
+              .leaflet-touch .leaflet-control-zoom-in,
+              .leaflet-touch .leaflet-control-zoom-out {
+                width: 44px !important;
+                height: 44px !important;
+                line-height: 44px !important;
+                font-size: 20px !important;
+              }
             }
           `}</style>
           {typeof window !== 'undefined' && (
             <MapContainer
               center={center}
               zoom={zoom}
-              style={{ height: '100%', width: '100%' }}
+              style={{ height: '100%', width: '100%', touchAction: 'manipulation' }}
               scrollWheelZoom={true}
               dragging={true}
               touchZoom={true}
               doubleClickZoom={true}
-              boxZoom={true}
+              boxZoom={false}
               keyboard={true}
               zoomControl={true}
               attributionControl={false}
               preferCanvas={true}
+              whenReady={(map) => {
+                // Additional mobile optimizations
+                const mapInstance = map.target;
+                mapInstance.getContainer().style.touchAction = 'manipulation';
+
+                // Disable double-tap zoom delay on mobile
+                if (mapInstance.tap) {
+                  mapInstance.tap.enable();
+                }
+              }}
             >
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
