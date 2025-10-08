@@ -5,17 +5,18 @@
 /* Import Leaflet CSS */
 @import 'leaflet/dist/leaflet.css';
 
+/* Light and Dark mode variables */
 :root {
     --foreground-rgb: 0, 0, 0;
-    --background-start-rgb: 214, 219, 220;
+    --background-start-rgb: 248, 250, 252;
     --background-end-rgb: 255, 255, 255;
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
         --foreground-rgb: 255, 255, 255;
-        --background-start-rgb: 0, 0, 0;
-        --background-end-rgb: 0, 0, 0;
+        --background-start-rgb: 15, 23, 42;
+        --background-end-rgb: 30, 41, 59;
     }
 }
 
@@ -24,6 +25,7 @@ body {
     background: linear-gradient(to bottom,
             transparent,
             rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
+    min-height: 100vh;
 }
 
 /* Fix for Leaflet marker icons */
@@ -34,4 +36,31 @@ body {
 
 .leaflet-popup-content-wrapper {
     border-radius: 8px;
+}
+
+/* Dark mode form inputs - Force proper styling */
+@media (prefers-color-scheme: dark) {
+    input[type="text"],
+    input[type="email"],
+    textarea,
+    select {
+        background-color: rgb(51, 65, 85) !important;
+        border-color: rgb(71, 85, 105) !important;
+        color: rgb(248, 250, 252) !important;
+    }
+    
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    textarea:focus,
+    select:focus {
+        background-color: rgb(51, 65, 85) !important;
+        border-color: rgb(59, 130, 246) !important;
+        color: rgb(248, 250, 252) !important;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+    }
+    
+    input::placeholder,
+    textarea::placeholder {
+        color: rgb(148, 163, 184) !important;
+    }
 }

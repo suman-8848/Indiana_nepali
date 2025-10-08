@@ -4,17 +4,17 @@ export default function MapPage() {
   return (
     <div>
       <div className="mb-4 sm:mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-center sm:text-left">Find Community Members</h1>
-        <p className="text-gray-600 text-sm sm:text-base text-center sm:text-left">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-center sm:text-left text-gray-900 dark:text-gray-100">Find Community Members</h1>
+        <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base text-center sm:text-left">
           Discover Nepali community members near you in Indiana. Click on markers to see contact information.
         </p>
       </div>
       
       <CommunityMap />
       
-      <div className="mt-4 sm:mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4">
-        <h3 className="font-semibold text-yellow-800 mb-2 text-sm sm:text-base">Privacy Notice</h3>
-        <p className="text-xs sm:text-sm text-yellow-700">
+      <div className="mt-4 sm:mt-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 sm:p-4">
+        <h3 className="font-semibold text-yellow-800 dark:text-yellow-300 mb-2 text-sm sm:text-base">Privacy Notice</h3>
+        <p className="text-xs sm:text-sm text-yellow-700 dark:text-yellow-400">
           Locations shown are approximate for privacy protection. Contact information is only visible 
           to help community members connect with each other.
         </p>

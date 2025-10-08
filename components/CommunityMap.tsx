@@ -182,19 +182,19 @@ export default function CommunityMap() {
 
   return (
     <div>
-      <div className="mb-4 sm:mb-6 bg-white p-3 sm:p-4 rounded-lg shadow-md">
+      <div className="mb-4 sm:mb-6 bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-lg shadow-md border dark:border-slate-700">
         <div className="space-y-3 sm:space-y-4">
           {/* Location Input Section */}
           <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-4">
             <button
               onClick={handleGetLocation}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm sm:text-base w-full sm:w-auto"
+              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white px-4 py-2 rounded text-sm sm:text-base w-full sm:w-auto transition-colors"
             >
               📍 Use My Location
             </button>
             
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
-              <span className="text-sm text-gray-500 text-center sm:text-left">or</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400 text-center sm:text-left">or</span>
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -202,12 +202,12 @@ export default function CommunityMap() {
                   value={locationInput}
                   onChange={(e) => setLocationInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleLocationSearch()}
-                  className="border border-gray-300 rounded px-3 py-2 text-sm flex-1 sm:w-48"
+                  className="border border-gray-300 dark:border-slate-600 rounded px-3 py-2 text-sm flex-1 sm:w-48 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                 />
                 <button
                   onClick={handleLocationSearch}
                   disabled={locationLoading}
-                  className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap"
+                  className="bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600 text-white px-3 sm:px-4 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap transition-colors"
                 >
                   {locationLoading ? 'Searching...' : 'Search'}
                 </button>
@@ -223,7 +223,7 @@ export default function CommunityMap() {
                 <select
                   value={searchRadius}
                   onChange={(e) => setSearchRadius(Number(e.target.value))}
-                  className="border border-gray-300 rounded px-2 py-1 text-sm"
+                  className="border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
                 >
                   <option value={10}>10 miles</option>
                   <option value={25}>25 miles</option>
@@ -233,7 +233,7 @@ export default function CommunityMap() {
               </div>
             )}
             
-            <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
+            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 text-center sm:text-left">
               {userLocation 
                 ? `Showing ${filteredProfiles.length} members within ${searchRadius} miles`
                 : 'Set your location to find nearby members'
@@ -300,19 +300,19 @@ export default function CommunityMap() {
         
         {!userLocation && (
           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10 p-4">
-            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg text-center max-w-sm sm:max-w-md w-full">
-              <h3 className="text-base sm:text-lg font-semibold mb-2">Find Nearby Community Members</h3>
-              <p className="text-gray-600 mb-4 text-sm sm:text-base">
+            <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-lg shadow-lg text-center max-w-sm sm:max-w-md w-full border dark:border-slate-700">
+              <h3 className="text-base sm:text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">Find Nearby Community Members</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm sm:text-base">
                 Set your location to discover Nepali community members near you in Indiana.
               </p>
               <div className="space-y-2">
                 <button
                   onClick={handleGetLocation}
-                  className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm sm:text-base"
+                  className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white px-4 py-2 rounded text-sm sm:text-base transition-colors"
                 >
                   📍 Use My Current Location
                 </button>
-                <p className="text-xs sm:text-sm text-gray-500">or enter a city/ZIP code above</p>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">or enter a city/ZIP code above</p>
               </div>
             </div>
           </div>
