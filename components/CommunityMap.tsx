@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import { supabase, Profile } from '../lib/supabase'
 import { geocodeLocation } from '../lib/geocoding'
@@ -64,6 +64,7 @@ export default function CommunityMap() {
   const [loading, setLoading] = useState(true)
   const [locationInput, setLocationInput] = useState('')
   const [locationLoading, setLocationLoading] = useState(false)
+  const mapRef = useRef<any>(null)
   const icons = useLeafletIcons()
 
   const fetchProfiles = useCallback(async () => {
@@ -114,14 +115,49 @@ export default function CommunityMap() {
       )
     : [] // Show no markers when user location is not set
 
+  // Function to fit map bounds to show user location and nearby members
+  const fitMapBounds = useCallback(() => {
+    if (!mapRef.current || !userLocation || filteredProfiles.length === 0) return
+
+    const map = mapRef.current
+    if (typeof window !== 'undefined') {
+      const L = require('leaflet')
+      
+      // Create bounds that include user location and all filtered profiles
+      const bounds = L.latLngBounds([
+        [userLocation.lat, userLocation.lng] // Start with user location
+      ])
+      
+      // Add all filtered profile locations to bounds
+      filteredProfiles.forEach(profile => {
+        bounds.extend([profile.latitude, profile.longitude])
+      })
+      
+      // Fit the map to these bounds with some padding
+      map.fitBounds(bounds, {
+        padding: [20, 20], // 20px padding on all sides
+        maxZoom: 12 // Don't zoom in too much for privacy
+      })
+    }
+  }, [userLocation, filteredProfiles])
+
+  // Fit bounds when user location or filtered profiles change
+  useEffect(() => {
+    if (userLocation && filteredProfiles.length > 0) {
+      // Small delay to ensure map is ready
+      setTimeout(fitMapBounds, 100)
+    }
+  }, [userLocation, filteredProfiles, fitMapBounds])
+
   const handleGetLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation({
+          const newLocation = {
             lat: position.coords.latitude,
             lng: position.coords.longitude
-          })
+          }
+          setUserLocation(newLocation)
         },
         (error) => {
           console.error('Error getting location:', error)
@@ -143,10 +179,11 @@ export default function CommunityMap() {
     try {
       const coordinates = await geocodeLocation(locationInput)
       if (coordinates) {
-        setUserLocation({
+        const newLocation = {
           lat: coordinates.lat,
           lng: coordinates.lng
-        })
+        }
+        setUserLocation(newLocation)
       } else {
         alert('Could not find location. Please try a different address or city name.')
       }
@@ -178,7 +215,7 @@ export default function CommunityMap() {
   }
 
   const center: [number, number] = userLocation ? [userLocation.lat, userLocation.lng] : [39.7684, -86.1581]
-  const zoom = userLocation ? 10 : 7
+  const zoom = userLocation ? (filteredProfiles.length > 0 ? 10 : 12) : 7
 
   return (
     <div>
@@ -241,12 +278,22 @@ export default function CommunityMap() {
             </div>
 
             {userLocation && (
-              <button
-                onClick={() => setUserLocation(null)}
-                className="text-sm text-red-600 hover:text-red-800 underline text-center sm:text-left"
-              >
-                Clear Location
-              </button>
+              <>
+                {filteredProfiles.length > 0 && (
+                  <button
+                    onClick={fitMapBounds}
+                    className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline text-center sm:text-left"
+                  >
+                    Fit to Members
+                  </button>
+                )}
+                <button
+                  onClick={() => setUserLocation(null)}
+                  className="text-sm text-red-600 hover:text-red-800 underline text-center sm:text-left"
+                >
+                  Clear Location
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -259,6 +306,7 @@ export default function CommunityMap() {
             zoom={zoom}
             style={{ height: '100%', width: '100%' }}
             className="z-0"
+            ref={mapRef}
           >
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
